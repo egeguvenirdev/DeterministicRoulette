@@ -11,6 +11,18 @@ public class RouletteGameManager : MonoBehaviour
 
     public event Action<RoundResultData> RoundCompleted;
 
+    public void Configure(
+        OutcomeSelector selector,
+        PayoutCalculator calculator,
+        BetManager manager,
+        StatisticsManager stats)
+    {
+        outcomeSelector = selector;
+        payoutCalculator = calculator;
+        betManager = manager;
+        statisticsManager = stats;
+    }
+
     public bool CanSpin()
     {
         if (outcomeSelector == null || payoutCalculator == null || betManager == null || statisticsManager == null)

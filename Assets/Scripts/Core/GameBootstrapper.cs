@@ -13,19 +13,19 @@ public class GameBootstrapper : MonoBehaviour
     [Header("UI")]
     [SerializeField] private GameUIController gameUIController;
 
-    private void Awake()
+    private void Start()
     {
         ResolveReferences();
 
-        if (gameManager != null)
+        if (!HasRequiredReferences())
         {
-            gameManager.Configure(outcomeSelector, payoutCalculator, betManager, statisticsManager);
+            Debug.LogError("[Bootstrapper] Missing required scene references. Initialization aborted.", this);
+            enabled = false;
+            return;
         }
 
-        if (gameUIController != null)
-        {
-            gameUIController.Initialize(outcomeSelector, betManager, gameManager, statisticsManager);
-        }
+        gameManager.Configure(outcomeSelector, payoutCalculator, betManager, statisticsManager);
+        gameUIController.Initialize(outcomeSelector, betManager, gameManager, statisticsManager);
     }
 
     private void ResolveReferences()
@@ -64,5 +64,16 @@ public class GameBootstrapper : MonoBehaviour
         {
             gameUIController = FindFirstObjectByType<GameUIController>();
         }
+    }
+
+    private bool HasRequiredReferences()
+    {
+        return rulesDatabase != null &&
+               outcomeSelector != null &&
+               payoutCalculator != null &&
+               betManager != null &&
+               statisticsManager != null &&
+               gameManager != null &&
+               gameUIController != null;
     }
 }

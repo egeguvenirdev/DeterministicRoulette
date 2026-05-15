@@ -6,23 +6,30 @@ public class StatisticsManager : MonoBehaviour
 
     private GameStateData gameState;
 
-    public GameStateData CurrentState => gameState;
+    public GameStateData CurrentState
+    {
+        get
+        {
+            EnsureState();
+            return gameState;
+        }
+    }
 
     private void Awake()
     {
-        gameState = new GameStateData
-        {
-            totalChips = startingChips
-        };
+        EnsureState();
     }
 
     public bool CanAfford(int amount)
     {
+        EnsureState();
         return amount >= 0 && gameState.totalChips >= amount;
     }
 
     public void ApplyRound(RoundResultData roundResult, int totalStake)
     {
+        EnsureState();
+
         if (roundResult == null)
         {
             return;
@@ -43,5 +50,18 @@ public class StatisticsManager : MonoBehaviour
         }
 
         gameState.roundHistory.Add(roundResult);
+    }
+
+    private void EnsureState()
+    {
+        if (gameState != null)
+        {
+            return;
+        }
+
+        gameState = new GameStateData
+        {
+            totalChips = startingChips
+        };
     }
 }

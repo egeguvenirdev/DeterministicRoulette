@@ -3,6 +3,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.Events;
 
 public class GameUIController : MonoBehaviour
 {
@@ -37,22 +38,35 @@ public class GameUIController : MonoBehaviour
     private bool panelOpen;
     private Coroutine panelSlideRoutine;
     private bool roundCompletedBound;
+    private bool panelStateInitialized;
 
     private void Awake()
     {
-        AutoResolveUIReferences();
-        EnsureGameplayReferences();
+        ResolveViewReferences();
         SetupDropdowns();
-        WireButtons();
         SetupPanelState();
-        RefreshView();
+    }
+
+    private void Start()
+    {
+        if (initialized)
+        {
+            return;
+        }
+
+        ResolveGameplayReferences();
+
+        if (HasDependencies())
+        {
+            Initialize(outcomeSelector, betManager, gameManager, statisticsManager);
+        }
     }
 
     private void OnEnable()
     {
-        AutoResolveUIReferences();
-        EnsureGameplayReferences();
+        ResolveViewReferences();
         WireButtons();
+        SetupPanelState();
     }
 
     public void Initialize(
@@ -66,12 +80,16 @@ public class GameUIController : MonoBehaviour
         gameManager = rouletteGameManager;
         statisticsManager = stats;
 
-        SetupDropdowns();
+        if (!HasDependencies())
+        {
+            Debug.LogError("[GameUIController] Missing gameplay dependencies during initialization.", this);
+            initialized = false;
+            return;
+        }
+
+        ResolveViewReferences();
         WireButtons();
-
-        EnsureGameplayReferences();
-
-        SetupPanelState();
+        BindRoundCompleted();
 
         initialized = true;
         RefreshView();
@@ -88,130 +106,130 @@ public class GameUIController : MonoBehaviour
         UnwireButtons();
     }
 
-    private void EnsureGameplayReferences()
-    {
-        if (outcomeSelector == null)
-        {
-            outcomeSelector = FindFirstObjectByType<OutcomeSelector>();
-        }
-
-        if (betManager == null)
-        {
-            betManager = FindFirstObjectByType<BetManager>();
-        }
-
-        if (gameManager == null)
-        {
-            gameManager = FindFirstObjectByType<RouletteGameManager>();
-        }
-
-        if (statisticsManager == null)
-        {
-            statisticsManager = FindFirstObjectByType<StatisticsManager>();
-        }
-
-        if (gameManager != null && !roundCompletedBound)
-        {
-            gameManager.RoundCompleted -= HandleRoundCompleted;
-            gameManager.RoundCompleted += HandleRoundCompleted;
-            roundCompletedBound = true;
-        }
-
-        if (!initialized && (betManager != null || gameManager != null || outcomeSelector != null || statisticsManager != null))
-        {
-            initialized = true;
-            Debug.Log("[UI] Auto-initialized gameplay references: gameManager=" + (gameManager != null) + ", outcomeSelector=" + (outcomeSelector != null) + ", betManager=" + (betManager != null) + ", statisticsManager=" + (statisticsManager != null));
-        }
-    }
-
     private void SetupDropdowns()
     {
         SetupDropdown(targetNumberDropdown, true);
         SetupDropdown(straightBetDropdown, false);
     }
 
-    private void AutoResolveUIReferences()
+    private void ResolveViewReferences()
     {
         if (slidingPanel == null)
         {
             slidingPanel = transform as RectTransform;
         }
 
-        if (targetNumberDropdown == null)
-        {
-            Transform t = transform.Find("Panel_OutcomeControls/Dropdown_TargetOutcome");
-            if (t != null)
-            {
-                targetNumberDropdown = t.GetComponent<TMP_Dropdown>();
-            }
-        }
-
-        if (straightBetDropdown == null)
-        {
-            Transform t = transform.Find("Panel_BetControls/Dropdown_StraightBetNumber");
-            if (t != null)
-            {
-                straightBetDropdown = t.GetComponent<TMP_Dropdown>();
-            }
-        }
-
-        if (stakeInput == null)
-        {
-            Transform t = transform.Find("Panel_BetControls/Input_StakeAmount");
-            if (t != null)
-            {
-                stakeInput = t.GetComponent<TMP_InputField>();
-            }
-        }
-
-        if (addStraightBetButton == null)
-        {
-            Transform t = transform.Find("Panel_BetControls/Row_BetButtons/Button_AddStraightBet");
-            if (t != null)
-            {
-                addStraightBetButton = t.GetComponent<Button>();
-            }
-        }
-
-        if (clearBetsButton == null)
-        {
-            Transform t = transform.Find("Panel_BetControls/Row_BetButtons/Button_ClearBets");
-            if (t != null)
-            {
-                clearBetsButton = t.GetComponent<Button>();
-            }
-        }
-
-        if (clearSelectionButton == null)
-        {
-            Transform t = transform.Find("Panel_OutcomeControls/Row_OutcomeButtons/Button_ClearSelection");
-            if (t != null)
-            {
-                clearSelectionButton = t.GetComponent<Button>();
-            }
-        }
-
-        if (spinButton == null)
-        {
-            Transform t = transform.Find("Panel_OutcomeControls/Row_OutcomeButtons/Button_Spin");
-            if (t != null)
-            {
-                spinButton = t.GetComponent<Button>();
-            }
-        }
-
         if (togglePanelButton == null)
         {
-            Transform t = transform.Find("Button_TogglePanel");
-            if (t != null)
+            Transform button = transform.Find("Button_TogglePanel");
+            if (button != null)
             {
-                togglePanelButton = t.GetComponent<Button>();
+                togglePanelButton = button.GetComponent<Button>();
             }
         }
 
         if (togglePanelButtonText == null && togglePanelButton != null)
         {
             togglePanelButtonText = togglePanelButton.GetComponentInChildren<TMP_Text>(true);
+        }
+
+        if (targetNumberDropdown == null)
+        {
+            Transform dropdown = transform.Find("Panel_OutcomeControls/Dropdown_TargetOutcome");
+            if (dropdown != null)
+            {
+                targetNumberDropdown = dropdown.GetComponent<TMP_Dropdown>();
+            }
+        }
+
+        if (straightBetDropdown == null)
+        {
+            Transform dropdown = transform.Find("Panel_BetControls/Dropdown_StraightBetNumber");
+            if (dropdown != null)
+            {
+                straightBetDropdown = dropdown.GetComponent<TMP_Dropdown>();
+            }
+        }
+
+        if (stakeInput == null)
+        {
+            Transform input = transform.Find("Panel_BetControls/Input_StakeAmount");
+            if (input != null)
+            {
+                stakeInput = input.GetComponent<TMP_InputField>();
+            }
+        }
+
+        if (addStraightBetButton == null)
+        {
+            Transform button = transform.Find("Panel_BetControls/Row_BetButtons/Button_AddStraightBet");
+            if (button != null)
+            {
+                addStraightBetButton = button.GetComponent<Button>();
+            }
+        }
+
+        if (clearBetsButton == null)
+        {
+            Transform button = transform.Find("Panel_BetControls/Row_BetButtons/Button_ClearBets");
+            if (button != null)
+            {
+                clearBetsButton = button.GetComponent<Button>();
+            }
+        }
+
+        if (clearSelectionButton == null)
+        {
+            Transform button = transform.Find("Panel_OutcomeControls/Row_OutcomeButtons/Button_ClearSelection");
+            if (button != null)
+            {
+                clearSelectionButton = button.GetComponent<Button>();
+            }
+        }
+
+        if (spinButton == null)
+        {
+            Transform button = transform.Find("Panel_OutcomeControls/Row_OutcomeButtons/Button_Spin");
+            if (button != null)
+            {
+                spinButton = button.GetComponent<Button>();
+            }
+        }
+
+        if (chipsText == null)
+        {
+            Transform label = transform.Find("Panel_TopStatus/Text_Chips");
+            if (label != null)
+            {
+                chipsText = label.GetComponent<TMP_Text>();
+            }
+        }
+
+        if (statsText == null)
+        {
+            Transform label = transform.Find("Panel_TopStatus/Text_Stats");
+            if (label != null)
+            {
+                statsText = label.GetComponent<TMP_Text>();
+            }
+        }
+
+        if (betsText == null)
+        {
+            Transform label = transform.Find("Panel_Result/Text_BetsSummary");
+            if (label != null)
+            {
+                betsText = label.GetComponent<TMP_Text>();
+            }
+        }
+
+        if (resultText == null)
+        {
+            Transform label = transform.Find("Panel_Result/Text_Result");
+            if (label != null)
+            {
+                resultText = label.GetComponent<TMP_Text>();
+            }
         }
     }
 
@@ -268,35 +286,11 @@ public class GameUIController : MonoBehaviour
 
     private void WireButtons()
     {
-        if (addStraightBetButton != null)
-        {
-            addStraightBetButton.onClick.RemoveListener(AddStraightBet);
-            addStraightBetButton.onClick.AddListener(AddStraightBet);
-        }
-
-        if (spinButton != null)
-        {
-            spinButton.onClick.RemoveListener(Spin);
-            spinButton.onClick.AddListener(Spin);
-        }
-
-        if (clearSelectionButton != null)
-        {
-            clearSelectionButton.onClick.RemoveListener(ClearSelection);
-            clearSelectionButton.onClick.AddListener(ClearSelection);
-        }
-
-        if (clearBetsButton != null)
-        {
-            clearBetsButton.onClick.RemoveListener(ClearBets);
-            clearBetsButton.onClick.AddListener(ClearBets);
-        }
-
-        if (togglePanelButton != null)
-        {
-            togglePanelButton.onClick.RemoveListener(TogglePanel);
-            togglePanelButton.onClick.AddListener(TogglePanel);
-        }
+        BindButton(addStraightBetButton, AddStraightBet);
+        BindButton(spinButton, Spin);
+        BindButton(clearSelectionButton, ClearSelection);
+        BindButton(clearBetsButton, ClearBets);
+        BindButton(togglePanelButton, TogglePanel);
     }
 
     private void UnwireButtons()
@@ -327,6 +321,21 @@ public class GameUIController : MonoBehaviour
         }
     }
 
+    private void BindButton(Button button, UnityAction action)
+    {
+        if (button == null)
+        {
+            return;
+        }
+
+        button.onClick.RemoveListener(action);
+
+        if (button.onClick.GetPersistentEventCount() == 0)
+        {
+            button.onClick.AddListener(action);
+        }
+    }
+
     private void SetupPanelState()
     {
         if (slidingPanel == null)
@@ -334,11 +343,17 @@ public class GameUIController : MonoBehaviour
             slidingPanel = transform as RectTransform;
         }
 
+        if (slidingPanel == null || panelStateInitialized)
+        {
+            return;
+        }
+
         panelOpen = !startCollapsed;
         Vector2 pos = slidingPanel.anchoredPosition;
         pos.x = panelOpen ? GetOpenX() : GetClosedX();
         slidingPanel.anchoredPosition = pos;
         UpdateToggleText();
+        panelStateInitialized = true;
     }
 
     public void TogglePanel()
@@ -415,19 +430,13 @@ public class GameUIController : MonoBehaviour
 
     private void AddStraightBet()
     {
-        Debug.Log("[UI] AddStraightBet clicked");
-
-        EnsureGameplayReferences();
-
-        if (betManager == null)
+        if (!initialized || betManager == null)
         {
-            Debug.Log("[UI] AddStraightBet ignored: betManager=False");
             return;
         }
 
         if (!TryGetStake(out int stake))
         {
-            Debug.Log("[UI] AddStraightBet invalid stake input");
             SetResultText("Invalid stake");
             return;
         }
@@ -442,25 +451,17 @@ public class GameUIController : MonoBehaviour
 
         if (!betManager.TryAddBet(bet))
         {
-            Debug.Log("[UI] AddStraightBet rejected: target=" + targetNumber + ", stake=" + stake);
             SetResultText("Bet rejected");
             return;
         }
-
-        Debug.Log("[UI] AddStraightBet success: target=" + targetNumber + ", stake=" + stake + ", totalBets=" + betManager.ActiveBets.Count);
 
         RefreshView();
     }
 
     private void Spin()
     {
-        Debug.Log("[UI] Spin clicked");
-
-        EnsureGameplayReferences();
-
-        if (gameManager == null || outcomeSelector == null)
+        if (!initialized || gameManager == null || outcomeSelector == null)
         {
-            Debug.Log("[UI] Spin ignored: gameManager=" + (gameManager != null) + ", outcomeSelector=" + (outcomeSelector != null));
             return;
         }
 
@@ -468,7 +469,6 @@ public class GameUIController : MonoBehaviour
 
         if (!gameManager.CanSpin())
         {
-            Debug.Log("[UI] Spin blocked: CanSpin returned false");
             SetResultText("Cannot spin");
             RefreshView();
             return;
@@ -478,12 +478,9 @@ public class GameUIController : MonoBehaviour
 
         if (roundResult == null)
         {
-            Debug.Log("[UI] Spin failed: gameManager returned null result");
             SetResultText("Spin failed");
             return;
         }
-
-        Debug.Log("[UI] Spin success: result=" + roundResult.resultNumber + ", winnings=" + roundResult.totalWinnings + ", losses=" + roundResult.totalLosses);
 
         RefreshView();
     }
@@ -506,8 +503,6 @@ public class GameUIController : MonoBehaviour
 
     private void ClearSelection()
     {
-        Debug.Log("[UI] ClearSelection clicked");
-
         if (outcomeSelector != null)
         {
             outcomeSelector.ClearSelection();
@@ -515,7 +510,8 @@ public class GameUIController : MonoBehaviour
 
         if (targetNumberDropdown != null)
         {
-            targetNumberDropdown.value = 0;
+            targetNumberDropdown.SetValueWithoutNotify(0);
+            targetNumberDropdown.RefreshShownValue();
         }
 
         RefreshView();
@@ -523,13 +519,9 @@ public class GameUIController : MonoBehaviour
 
     private void ClearBets()
     {
-        Debug.Log("[UI] ClearBets clicked");
-
         if (betManager != null)
         {
-            Debug.Log("[UI] ClearBets before clear: count=" + betManager.ActiveBets.Count + ", stake=" + betManager.GetTotalStake());
             betManager.ClearBets();
-            Debug.Log("[UI] ClearBets after clear: count=" + betManager.ActiveBets.Count + ", stake=" + betManager.GetTotalStake());
         }
 
         RefreshView();
@@ -549,7 +541,6 @@ public class GameUIController : MonoBehaviour
 
     private void HandleRoundCompleted(RoundResultData roundResult)
     {
-        Debug.Log("[UI] RoundCompleted: result=" + roundResult.resultNumber + ", selected=" + roundResult.selectedNumber + ", winnings=" + roundResult.totalWinnings + ", losses=" + roundResult.totalLosses);
         SetResultText("Result: " + roundResult.resultNumber + "  Win: " + roundResult.totalWinnings);
         RefreshView();
     }
@@ -559,6 +550,11 @@ public class GameUIController : MonoBehaviour
         if (statisticsManager != null)
         {
             GameStateData state = statisticsManager.CurrentState;
+
+            if (state == null)
+            {
+                return;
+            }
 
             if (chipsText != null)
             {
@@ -583,5 +579,48 @@ public class GameUIController : MonoBehaviour
         {
             resultText.text = message;
         }
+    }
+
+    private bool HasDependencies()
+    {
+        return outcomeSelector != null &&
+               betManager != null &&
+               gameManager != null &&
+               statisticsManager != null;
+    }
+
+    private void ResolveGameplayReferences()
+    {
+        if (outcomeSelector == null)
+        {
+            outcomeSelector = FindFirstObjectByType<OutcomeSelector>();
+        }
+
+        if (betManager == null)
+        {
+            betManager = FindFirstObjectByType<BetManager>();
+        }
+
+        if (gameManager == null)
+        {
+            gameManager = FindFirstObjectByType<RouletteGameManager>();
+        }
+
+        if (statisticsManager == null)
+        {
+            statisticsManager = FindFirstObjectByType<StatisticsManager>();
+        }
+    }
+
+    private void BindRoundCompleted()
+    {
+        if (gameManager == null || roundCompletedBound)
+        {
+            return;
+        }
+
+        gameManager.RoundCompleted -= HandleRoundCompleted;
+        gameManager.RoundCompleted += HandleRoundCompleted;
+        roundCompletedBound = true;
     }
 }

@@ -34,6 +34,7 @@ public class GameUIController : MonoBehaviour
     private BetManager betManager;
     private RouletteGameManager gameManager;
     private StatisticsManager statisticsManager;
+    private RouletteGameFlowService flowService;
     private bool initialized;
     private bool panelOpen;
     private Coroutine panelSlideRoutine;
@@ -86,6 +87,8 @@ public class GameUIController : MonoBehaviour
             initialized = false;
             return;
         }
+
+        flowService = new RouletteGameFlowService(betManager, gameManager, outcomeSelector, statisticsManager);
 
         ResolveViewReferences();
         WireButtons();
@@ -430,7 +433,7 @@ public class GameUIController : MonoBehaviour
 
     private void AddStraightBet()
     {
-        if (!initialized || betManager == null)
+        if (!initialized || flowService == null)
         {
             return;
         }
@@ -442,14 +445,8 @@ public class GameUIController : MonoBehaviour
         }
 
         int targetNumber = straightBetDropdown != null ? straightBetDropdown.value : 0;
-        BetData bet = new BetData
-        {
-            betType = BetType.Straight,
-            targetNumber = targetNumber,
-            amount = stake
-        };
 
-        if (!betManager.TryAddBet(bet))
+        if (!flowService.TryAddStraightBet(targetNumber, stake))
         {
             SetResultText("Bet rejected");
             return;
@@ -460,7 +457,7 @@ public class GameUIController : MonoBehaviour
 
     private void Spin()
     {
-        if (!initialized || gameManager == null || outcomeSelector == null)
+        if (!initialized || flowService == null)
         {
             return;
         }
@@ -474,7 +471,7 @@ public class GameUIController : MonoBehaviour
             return;
         }
 
-        RoundResultData roundResult = gameManager.Spin();
+        RoundResultData roundResult = flowService.ExecuteSpin();
 
         if (roundResult == null)
         {
@@ -487,25 +484,25 @@ public class GameUIController : MonoBehaviour
 
     private void ApplySelection()
     {
-        if (targetNumberDropdown == null || outcomeSelector == null)
+        if (targetNumberDropdown == null || flowService == null)
         {
             return;
         }
 
         if (targetNumberDropdown.value == 0)
         {
-            outcomeSelector.ClearSelection();
+            flowService.ClearOutcomeSelection();
             return;
         }
 
-        outcomeSelector.SetSelectedNumber(targetNumberDropdown.value - 1);
+        flowService.SetOutcomeSelection(targetNumberDropdown.value - 1);
     }
 
     private void ClearSelection()
     {
-        if (outcomeSelector != null)
+        if (flowService != null)
         {
-            outcomeSelector.ClearSelection();
+            flowService.ClearOutcomeSelection();
         }
 
         if (targetNumberDropdown != null)
@@ -519,9 +516,9 @@ public class GameUIController : MonoBehaviour
 
     private void ClearBets()
     {
-        if (betManager != null)
+        if (flowService != null)
         {
-            betManager.ClearBets();
+            flowService.ClearAllBets();
         }
 
         RefreshView();
@@ -547,9 +544,9 @@ public class GameUIController : MonoBehaviour
 
     private void RefreshView()
     {
-        if (statisticsManager != null)
+        if (flowService != null)
         {
-            GameStateData state = statisticsManager.CurrentState;
+            GameStateData state = flowService.GetGameState();
 
             if (state == null)
             {
@@ -567,9 +564,9 @@ public class GameUIController : MonoBehaviour
             }
         }
 
-        if (betsText != null && betManager != null)
+        if (betsText != null && flowService != null)
         {
-            betsText.text = "Bets: " + betManager.ActiveBets.Count + "  Stake: " + betManager.GetTotalStake();
+            betsText.text = "Bets: " + flowService.GetActiveBetCount() + "  Stake: " + flowService.GetTotalStake();
         }
     }
 

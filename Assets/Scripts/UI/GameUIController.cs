@@ -31,6 +31,10 @@ public class GameUIController : MonoBehaviour
     [SerializeField] private TMP_Text winningsAmountText;
     [SerializeField] private TMP_Text statsText;
 
+    [Header("Animation Sync")]
+    [SerializeField] private RouletteWheelAnimator wheelAnimator;
+    [SerializeField] private bool waitForWheelAnimation = true;
+
     private OutcomeSelector outcomeSelector;
     private BetManager betManager;
     private RouletteGameManager gameManager;
@@ -41,6 +45,8 @@ public class GameUIController : MonoBehaviour
     private Coroutine panelSlideRoutine;
     private bool roundCompletedBound;
     private bool panelStateInitialized;
+    private bool wheelAnimatorBound;
+    private RoundResultData pendingRoundResult;
 
     private void Awake()
     {
@@ -94,6 +100,7 @@ public class GameUIController : MonoBehaviour
         ResolveViewReferences();
         WireButtons();
         BindRoundCompleted();
+        BindWheelAnimator();
 
         initialized = true;
         RefreshView();
@@ -106,6 +113,8 @@ public class GameUIController : MonoBehaviour
             gameManager.RoundCompleted -= HandleRoundCompleted;
             roundCompletedBound = false;
         }
+
+        UnbindWheelAnimator();
 
         UnwireButtons();
     }
@@ -502,10 +511,16 @@ public class GameUIController : MonoBehaviour
 
         ApplySelection();
 
+        if (ShouldWaitForWheelAnimation())
+        {
+            SetControlsInteractable(false);
+        }
+
         if (!gameManager.CanSpin())
         {
             Debug.LogWarning("Cannot spin");
             RefreshView();
+            SetControlsInteractable(true);
             return;
         }
 
@@ -514,10 +529,14 @@ public class GameUIController : MonoBehaviour
         if (roundResult == null)
         {
             Debug.LogWarning("Spin failed");
+            SetControlsInteractable(true);
             return;
         }
 
-        RefreshView();
+        if (!ShouldWaitForWheelAnimation())
+        {
+            RefreshView();
+        }
     }
 
     private void ApplySelection()
@@ -581,6 +600,23 @@ public class GameUIController : MonoBehaviour
             return;
         }
 
+        if (ShouldWaitForWheelAnimation())
+        {
+            pendingRoundResult = roundResult;
+            return;
+        }
+
+        ApplyRoundResultToView(roundResult);
+        RefreshView();
+    }
+
+    private void ApplyRoundResultToView(RoundResultData roundResult)
+    {
+        if (roundResult == null)
+        {
+            return;
+        }
+
         // Winning number with red/black color
         string numberColor = IsRedNumber(roundResult.resultNumber) ? "#FF0000" : "#000000";
         if (winningNumberText != null)
@@ -598,8 +634,100 @@ public class GameUIController : MonoBehaviour
         {
             winningsAmountText.text = $"<color=#FF0000>- {roundResult.totalLosses}</color>";
         }
-        
+    }
+
+    private void BindWheelAnimator()
+    {
+        if (wheelAnimator == null || wheelAnimatorBound)
+        {
+            return;
+        }
+
+        wheelAnimator.SpinAnimationStarted -= HandleSpinAnimationStarted;
+        wheelAnimator.SpinAnimationStarted += HandleSpinAnimationStarted;
+
+        wheelAnimator.SpinAnimationCompleted -= HandleSpinAnimationCompleted;
+        wheelAnimator.SpinAnimationCompleted += HandleSpinAnimationCompleted;
+
+        wheelAnimatorBound = true;
+    }
+
+    private void UnbindWheelAnimator()
+    {
+        if (wheelAnimator == null || !wheelAnimatorBound)
+        {
+            return;
+        }
+
+        wheelAnimator.SpinAnimationStarted -= HandleSpinAnimationStarted;
+        wheelAnimator.SpinAnimationCompleted -= HandleSpinAnimationCompleted;
+        wheelAnimatorBound = false;
+    }
+
+    private void HandleSpinAnimationStarted()
+    {
+        if (ShouldWaitForWheelAnimation())
+        {
+            SetControlsInteractable(false);
+        }
+    }
+
+    private void HandleSpinAnimationCompleted(RoundResultData roundResult)
+    {
+        RoundResultData finalResult = pendingRoundResult ?? roundResult;
+        pendingRoundResult = null;
+
+        ApplyRoundResultToView(finalResult);
         RefreshView();
+        SetControlsInteractable(true);
+    }
+
+    private bool ShouldWaitForWheelAnimation()
+    {
+        return waitForWheelAnimation && wheelAnimator != null && wheelAnimator.enabled;
+    }
+
+    private void SetControlsInteractable(bool interactable)
+    {
+        if (targetNumberDropdown != null)
+        {
+            targetNumberDropdown.interactable = interactable;
+        }
+
+        if (straightBetDropdown != null)
+        {
+            straightBetDropdown.interactable = interactable;
+        }
+
+        if (stakeInput != null)
+        {
+            stakeInput.interactable = interactable;
+        }
+
+        if (addStraightBetButton != null)
+        {
+            addStraightBetButton.interactable = interactable;
+        }
+
+        if (spinButton != null)
+        {
+            spinButton.interactable = interactable;
+        }
+
+        if (clearSelectionButton != null)
+        {
+            clearSelectionButton.interactable = interactable;
+        }
+
+        if (clearBetsButton != null)
+        {
+            clearBetsButton.interactable = interactable;
+        }
+
+        if (togglePanelButton != null)
+        {
+            togglePanelButton.interactable = interactable;
+        }
     }
     
     private bool IsRedNumber(int number)
@@ -664,6 +792,11 @@ public class GameUIController : MonoBehaviour
         if (statisticsManager == null)
         {
             statisticsManager = FindFirstObjectByType<StatisticsManager>();
+        }
+
+        if (wheelAnimator == null)
+        {
+            wheelAnimator = FindFirstObjectByType<RouletteWheelAnimator>();
         }
     }
 

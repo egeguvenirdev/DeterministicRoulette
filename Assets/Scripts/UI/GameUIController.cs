@@ -27,7 +27,8 @@ public class GameUIController : MonoBehaviour
     [Header("Labels")]
     [SerializeField] private TMP_Text chipsText;
     [SerializeField] private TMP_Text betsText;
-    [SerializeField] private TMP_Text resultText;
+    [SerializeField] private TMP_Text winningNumberText;
+    [SerializeField] private TMP_Text winningsAmountText;
     [SerializeField] private TMP_Text statsText;
 
     private OutcomeSelector outcomeSelector;
@@ -124,10 +125,10 @@ public class GameUIController : MonoBehaviour
 
         if (togglePanelButton == null)
         {
-            Transform button = transform.Find("Button_TogglePanel");
+            Button button = FindByPathOrName<Button>("Button_TogglePanel", "TogglePanel", "Toggle");
             if (button != null)
             {
-                togglePanelButton = button.GetComponent<Button>();
+                togglePanelButton = button;
             }
         }
 
@@ -138,102 +139,139 @@ public class GameUIController : MonoBehaviour
 
         if (targetNumberDropdown == null)
         {
-            Transform dropdown = transform.Find("Panel_OutcomeControls/Dropdown_TargetOutcome");
+            TMP_Dropdown dropdown = FindByPathOrName<TMP_Dropdown>("Panel_OutcomeControls/Dropdown_TargetOutcome", "Dropdown_TargetOutcome", "TargetOutcome");
             if (dropdown != null)
             {
-                targetNumberDropdown = dropdown.GetComponent<TMP_Dropdown>();
+                targetNumberDropdown = dropdown;
             }
         }
 
         if (straightBetDropdown == null)
         {
-            Transform dropdown = transform.Find("Panel_BetControls/Dropdown_StraightBetNumber");
+            TMP_Dropdown dropdown = FindByPathOrName<TMP_Dropdown>("Panel_BetControls/Dropdown_StraightBetNumber", "Dropdown_StraightBetNumber", "StraightBetNumber");
             if (dropdown != null)
             {
-                straightBetDropdown = dropdown.GetComponent<TMP_Dropdown>();
+                straightBetDropdown = dropdown;
             }
         }
 
         if (stakeInput == null)
         {
-            Transform input = transform.Find("Panel_BetControls/Input_StakeAmount");
+            TMP_InputField input = FindByPathOrName<TMP_InputField>("Panel_BetControls/Input_StakeAmount", "Input_StakeAmount", "StakeAmount");
             if (input != null)
             {
-                stakeInput = input.GetComponent<TMP_InputField>();
+                stakeInput = input;
             }
         }
 
         if (addStraightBetButton == null)
         {
-            Transform button = transform.Find("Panel_BetControls/Row_BetButtons/Button_AddStraightBet");
+            Button button = FindByPathOrName<Button>("Panel_BetControls/Row_BetButtons/Button_AddStraightBet", "Button_AddStraightBet", "AddStraightBet");
             if (button != null)
             {
-                addStraightBetButton = button.GetComponent<Button>();
+                addStraightBetButton = button;
             }
         }
 
         if (clearBetsButton == null)
         {
-            Transform button = transform.Find("Panel_BetControls/Row_BetButtons/Button_ClearBets");
+            Button button = FindByPathOrName<Button>("Panel_BetControls/Row_BetButtons/Button_ClearBets", "Button_ClearBets", "ClearBets");
             if (button != null)
             {
-                clearBetsButton = button.GetComponent<Button>();
+                clearBetsButton = button;
             }
         }
 
         if (clearSelectionButton == null)
         {
-            Transform button = transform.Find("Panel_OutcomeControls/Row_OutcomeButtons/Button_ClearSelection");
+            Button button = FindByPathOrName<Button>("Panel_OutcomeControls/Row_OutcomeButtons/Button_ClearSelection", "Button_ClearSelection", "ClearSelection");
             if (button != null)
             {
-                clearSelectionButton = button.GetComponent<Button>();
+                clearSelectionButton = button;
             }
         }
 
         if (spinButton == null)
         {
-            Transform button = transform.Find("Panel_OutcomeControls/Row_OutcomeButtons/Button_Spin");
+            Button button = FindByPathOrName<Button>("Panel_OutcomeControls/Row_OutcomeButtons/Button_Spin", "Button_Spin", "Spin");
             if (button != null)
             {
-                spinButton = button.GetComponent<Button>();
+                spinButton = button;
             }
         }
 
         if (chipsText == null)
         {
-            Transform label = transform.Find("Panel_TopStatus/Text_Chips");
+            TMP_Text label = FindByPathOrName<TMP_Text>("Panel_TopStatus/Text_Chips", "Text_Chips", "Chips");
             if (label != null)
             {
-                chipsText = label.GetComponent<TMP_Text>();
+                chipsText = label;
             }
         }
 
         if (statsText == null)
         {
-            Transform label = transform.Find("Panel_TopStatus/Text_Stats");
+            TMP_Text label = FindByPathOrName<TMP_Text>("Panel_TopStatus/Text_Stats", "Text_Stats", "Stats");
             if (label != null)
             {
-                statsText = label.GetComponent<TMP_Text>();
+                statsText = label;
             }
         }
 
         if (betsText == null)
         {
-            Transform label = transform.Find("Panel_Result/Text_BetsSummary");
+            TMP_Text label = FindByPathOrName<TMP_Text>("Panel_Result/Text_BetsSummary", "Text_BetsSummary", "BetsSummary");
             if (label != null)
             {
-                betsText = label.GetComponent<TMP_Text>();
+                betsText = label;
             }
         }
 
-        if (resultText == null)
+        if (winningNumberText == null)
         {
-            Transform label = transform.Find("Panel_Result/Text_Result");
+            TMP_Text label = FindByPathOrName<TMP_Text>("Panel_Result/Text_WinningNumber", "Text_WinningNumber", "WinningNumber");
             if (label != null)
             {
-                resultText = label.GetComponent<TMP_Text>();
+                winningNumberText = label;
             }
         }
+
+        if (winningsAmountText == null)
+        {
+            TMP_Text label = FindByPathOrName<TMP_Text>("Panel_Result/Text_WinningsAmount", "Text_WinningsAmount", "WinningsAmount");
+            if (label != null)
+            {
+                winningsAmountText = label;
+            }
+        }
+    }
+
+    private T FindByPathOrName<T>(string path, params string[] nameHints) where T : Component
+    {
+        Transform byPath = transform.Find(path);
+        if (byPath != null)
+        {
+            T byPathComponent = byPath.GetComponent<T>();
+            if (byPathComponent != null)
+            {
+                return byPathComponent;
+            }
+        }
+
+        T[] all = GetComponentsInChildren<T>(true);
+        for (int i = 0; i < all.Length; i++)
+        {
+            string candidateName = all[i].name;
+            for (int j = 0; j < nameHints.Length; j++)
+            {
+                if (candidateName.IndexOf(nameHints[j], System.StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    return all[i];
+                }
+            }
+        }
+
+        return null;
     }
 
     private void SetupDropdown(TMP_Dropdown dropdown, bool includeRandom)
@@ -440,7 +478,7 @@ public class GameUIController : MonoBehaviour
 
         if (!TryGetStake(out int stake))
         {
-            SetResultText("Invalid stake");
+            Debug.LogWarning("Invalid stake");
             return;
         }
 
@@ -448,7 +486,7 @@ public class GameUIController : MonoBehaviour
 
         if (!flowService.TryAddStraightBet(targetNumber, stake))
         {
-            SetResultText("Bet rejected");
+            Debug.LogWarning("Bet rejected");
             return;
         }
 
@@ -466,7 +504,7 @@ public class GameUIController : MonoBehaviour
 
         if (!gameManager.CanSpin())
         {
-            SetResultText("Cannot spin");
+            Debug.LogWarning("Cannot spin");
             RefreshView();
             return;
         }
@@ -475,7 +513,7 @@ public class GameUIController : MonoBehaviour
 
         if (roundResult == null)
         {
-            SetResultText("Spin failed");
+            Debug.LogWarning("Spin failed");
             return;
         }
 
@@ -538,8 +576,36 @@ public class GameUIController : MonoBehaviour
 
     private void HandleRoundCompleted(RoundResultData roundResult)
     {
-        SetResultText("Result: " + roundResult.resultNumber + "  Win: " + roundResult.totalWinnings);
+        if (roundResult == null)
+        {
+            return;
+        }
+
+        // Winning number with red/black color
+        string numberColor = IsRedNumber(roundResult.resultNumber) ? "#FF0000" : "#000000";
+        if (winningNumberText != null)
+        {
+            winningNumberText.text = $"<color={numberColor}>{roundResult.resultNumber}</color>";
+        }
+        
+        // Winnings/Loss amount with green/red color
+        bool hasWinningBet = roundResult.winningBets != null && roundResult.winningBets.Count > 0;
+        if (winningsAmountText != null && hasWinningBet && roundResult.totalWinnings > 0)
+        {
+            winningsAmountText.text = $"<color=#00FF00>+ {roundResult.totalWinnings}</color>";
+        }
+        else if (winningsAmountText != null)
+        {
+            winningsAmountText.text = $"<color=#FF0000>- {roundResult.totalLosses}</color>";
+        }
+        
         RefreshView();
+    }
+    
+    private bool IsRedNumber(int number)
+    {
+        int[] redNumbers = { 1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36 };
+        return System.Array.Exists(redNumbers, element => element == number);
     }
 
     private void RefreshView()
@@ -567,14 +633,6 @@ public class GameUIController : MonoBehaviour
         if (betsText != null && flowService != null)
         {
             betsText.text = "Bets: " + flowService.GetActiveBetCount() + "  Stake: " + flowService.GetTotalStake();
-        }
-    }
-
-    private void SetResultText(string message)
-    {
-        if (resultText != null)
-        {
-            resultText.text = message;
         }
     }
 

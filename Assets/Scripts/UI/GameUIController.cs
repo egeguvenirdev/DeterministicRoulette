@@ -7,19 +7,9 @@ using UnityEngine.Events;
 
 public class GameUIController : MonoBehaviour
 {
-    [Header("Panel")]
-    [SerializeField] private RectTransform slidingPanel;
-    [SerializeField] private Button togglePanelButton;
-    [SerializeField] private TMP_Text togglePanelButtonText;
-    [SerializeField] private bool startCollapsed = true;
-    [SerializeField] private float panelClosedX = 1120f;
-    [SerializeField] private float panelSlideDuration = 0.22f;
-
     [Header("Controls")]
     [SerializeField] private TMP_Dropdown targetNumberDropdown;
-    [SerializeField] private TMP_Dropdown straightBetDropdown;
     [SerializeField] private TMP_InputField stakeInput;
-    [SerializeField] private Button addStraightBetButton;
     [SerializeField] private Button spinButton;
     [SerializeField] private Button clearSelectionButton;
     [SerializeField] private Button clearBetsButton;
@@ -44,10 +34,7 @@ public class GameUIController : MonoBehaviour
     private StatisticsManager statisticsManager;
     private RouletteGameFlowService flowService;
     private bool initialized;
-    private bool panelOpen;
-    private Coroutine panelSlideRoutine;
     private bool roundCompletedBound;
-    private bool panelStateInitialized;
     private bool wheelAnimatorBound;
     private RoundResultData pendingRoundResult;
 
@@ -55,7 +42,6 @@ public class GameUIController : MonoBehaviour
     {
         ResolveViewReferences();
         SetupDropdowns();
-        SetupPanelState();
     }
 
     private void Start()
@@ -77,7 +63,6 @@ public class GameUIController : MonoBehaviour
     {
         ResolveViewReferences();
         WireButtons();
-        SetupPanelState();
     }
 
     public void Initialize(
@@ -127,30 +112,10 @@ public class GameUIController : MonoBehaviour
     private void SetupDropdowns()
     {
         SetupDropdown(targetNumberDropdown, true);
-        SetupDropdown(straightBetDropdown, false);
     }
 
     private void ResolveViewReferences()
     {
-        if (slidingPanel == null)
-        {
-            slidingPanel = transform as RectTransform;
-        }
-
-        if (togglePanelButton == null)
-        {
-            Button button = FindByPathOrName<Button>("Button_TogglePanel", "TogglePanel", "Toggle");
-            if (button != null)
-            {
-                togglePanelButton = button;
-            }
-        }
-
-        if (togglePanelButtonText == null && togglePanelButton != null)
-        {
-            togglePanelButtonText = togglePanelButton.GetComponentInChildren<TMP_Text>(true);
-        }
-
         if (targetNumberDropdown == null)
         {
             TMP_Dropdown dropdown = FindByPathOrName<TMP_Dropdown>("Panel_OutcomeControls/Dropdown_TargetOutcome", "Dropdown_TargetOutcome", "TargetOutcome");
@@ -160,30 +125,12 @@ public class GameUIController : MonoBehaviour
             }
         }
 
-        if (straightBetDropdown == null)
-        {
-            TMP_Dropdown dropdown = FindByPathOrName<TMP_Dropdown>("Panel_BetControls/Dropdown_StraightBetNumber", "Dropdown_StraightBetNumber", "StraightBetNumber");
-            if (dropdown != null)
-            {
-                straightBetDropdown = dropdown;
-            }
-        }
-
         if (stakeInput == null)
         {
             TMP_InputField input = FindByPathOrName<TMP_InputField>("Panel_BetControls/Input_StakeAmount", "Input_StakeAmount", "StakeAmount");
             if (input != null)
             {
                 stakeInput = input;
-            }
-        }
-
-        if (addStraightBetButton == null)
-        {
-            Button button = FindByPathOrName<Button>("Panel_BetControls/Row_BetButtons/Button_AddStraightBet", "Button_AddStraightBet", "AddStraightBet");
-            if (button != null)
-            {
-                addStraightBetButton = button;
             }
         }
 
@@ -341,20 +288,13 @@ public class GameUIController : MonoBehaviour
 
     private void WireButtons()
     {
-        BindButton(addStraightBetButton, AddStraightBet);
         BindButton(spinButton, Spin);
         BindButton(clearSelectionButton, ClearSelection);
         BindButton(clearBetsButton, ClearBets);
-        BindButton(togglePanelButton, TogglePanel);
     }
 
     private void UnwireButtons()
     {
-        if (addStraightBetButton != null)
-        {
-            addStraightBetButton.onClick.RemoveListener(AddStraightBet);
-        }
-
         if (spinButton != null)
         {
             spinButton.onClick.RemoveListener(Spin);
@@ -368,11 +308,6 @@ public class GameUIController : MonoBehaviour
         if (clearBetsButton != null)
         {
             clearBetsButton.onClick.RemoveListener(ClearBets);
-        }
-
-        if (togglePanelButton != null)
-        {
-            togglePanelButton.onClick.RemoveListener(TogglePanel);
         }
     }
 
@@ -391,80 +326,6 @@ public class GameUIController : MonoBehaviour
         }
     }
 
-    private void SetupPanelState()
-    {
-        if (slidingPanel == null)
-        {
-            slidingPanel = transform as RectTransform;
-        }
-
-        if (slidingPanel == null || panelStateInitialized)
-        {
-            return;
-        }
-
-        panelOpen = !startCollapsed;
-        Vector2 pos = slidingPanel.anchoredPosition;
-        pos.x = panelOpen ? GetOpenX() : GetClosedX();
-        slidingPanel.anchoredPosition = pos;
-        UpdateToggleText();
-        panelStateInitialized = true;
-    }
-
-    public void TogglePanel()
-    {
-        if (slidingPanel == null)
-        {
-            return;
-        }
-
-        panelOpen = !panelOpen;
-
-        if (panelSlideRoutine != null)
-        {
-            StopCoroutine(panelSlideRoutine);
-        }
-
-        float targetX = panelOpen ? GetOpenX() : GetClosedX();
-        panelSlideRoutine = StartCoroutine(SlidePanelTo(targetX));
-        UpdateToggleText();
-    }
-
-    private float GetOpenX()
-    {
-        return 0f;
-    }
-
-    private IEnumerator SlidePanelTo(float targetX)
-    {
-        Vector2 start = slidingPanel.anchoredPosition;
-        Vector2 end = new Vector2(targetX, start.y);
-        float t = 0f;
-
-        while (t < 1f)
-        {
-            t += Time.unscaledDeltaTime / Mathf.Max(0.01f, panelSlideDuration);
-            float eased = 1f - Mathf.Pow(1f - Mathf.Clamp01(t), 3f);
-            slidingPanel.anchoredPosition = Vector2.LerpUnclamped(start, end, eased);
-            yield return null;
-        }
-
-        slidingPanel.anchoredPosition = end;
-        panelSlideRoutine = null;
-    }
-
-    private float GetClosedX()
-    {
-        return panelClosedX;
-    }
-
-    private void UpdateToggleText()
-    {
-        if (togglePanelButtonText != null)
-        {
-            togglePanelButtonText.text = panelOpen ? ">" : "<";
-        }
-    }
 
     private List<TMP_Dropdown.OptionData> BuildNumberOptions(bool includeRandom)
     {
@@ -481,30 +342,6 @@ public class GameUIController : MonoBehaviour
         }
 
         return options;
-    }
-
-    private void AddStraightBet()
-    {
-        if (!initialized || flowService == null)
-        {
-            return;
-        }
-
-        if (!TryGetStake(out int stake))
-        {
-            Debug.LogWarning("Invalid stake");
-            return;
-        }
-
-        int targetNumber = straightBetDropdown != null ? straightBetDropdown.value : 0;
-
-        if (!flowService.TryAddStraightBet(targetNumber, stake))
-        {
-            Debug.LogWarning("Bet rejected");
-            return;
-        }
-
-        RefreshView();
     }
 
     private void Spin()
@@ -733,19 +570,9 @@ public class GameUIController : MonoBehaviour
             targetNumberDropdown.interactable = interactable;
         }
 
-        if (straightBetDropdown != null)
-        {
-            straightBetDropdown.interactable = interactable;
-        }
-
         if (stakeInput != null)
         {
             stakeInput.interactable = interactable;
-        }
-
-        if (addStraightBetButton != null)
-        {
-            addStraightBetButton.interactable = interactable;
         }
 
         if (spinButton != null)
@@ -763,10 +590,6 @@ public class GameUIController : MonoBehaviour
             clearBetsButton.interactable = interactable;
         }
 
-        if (togglePanelButton != null)
-        {
-            togglePanelButton.interactable = interactable;
-        }
 
         if (betBoardController != null)
         {

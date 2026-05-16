@@ -7,7 +7,7 @@ public class RouletteBetBoardController : MonoBehaviour
     [Header("References")]
     [SerializeField] private GameUIController gameUIController;
     [SerializeField] private RectTransform chipLayerParent;
-    [SerializeField] private Image chipVisualPrefab;
+    [SerializeField] private GameObject chipVisualPrefab;
     [SerializeField] private RouletteBetCellView[] cells;
 
     private readonly Dictionary<RouletteBetCellView, Image> chipsByCell = new Dictionary<RouletteBetCellView, Image>();
@@ -55,7 +55,7 @@ public class RouletteBetBoardController : MonoBehaviour
         {
             if (pair.Value != null)
             {
-                Destroy(pair.Value.gameObject);
+                SafeDestroy(pair.Value.gameObject);
             }
 
             if (pair.Key != null)
@@ -147,10 +147,34 @@ public class RouletteBetBoardController : MonoBehaviour
             return;
         }
 
-        Image chip = Instantiate(chipVisualPrefab, parent, false);
+        GameObject chipObject = Instantiate(chipVisualPrefab, parent, false);
+        Image chip = chipObject.GetComponent<Image>();
+        if (chip == null)
+        {
+            Debug.LogWarning("[RouletteBetBoardController] Chip prefab must have an Image component on root.", this);
+            SafeDestroy(chipObject);
+            return;
+        }
+
         PositionChip(chip, cell.ChipAnchor);
         chipsByCell[cell] = chip;
         cell.SetHighlighted(true);
+    }
+
+    private static void SafeDestroy(GameObject target)
+    {
+        if (target == null)
+        {
+            return;
+        }
+
+        if (Application.isPlaying)
+        {
+            Destroy(target);
+            return;
+        }
+
+        DestroyImmediate(target);
     }
 
     private static void PositionChip(Image chip, RectTransform anchor)

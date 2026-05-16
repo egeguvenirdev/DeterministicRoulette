@@ -1282,6 +1282,30 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 581590685110307575, guid: 7bd406bfaf973f0469ae7567dc98e5f1, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 581590685110307575, guid: 7bd406bfaf973f0469ae7567dc98e5f1, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 581590685110307575, guid: 7bd406bfaf973f0469ae7567dc98e5f1, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 581590685110307575, guid: 7bd406bfaf973f0469ae7567dc98e5f1, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 581590685110307575, guid: 7bd406bfaf973f0469ae7567dc98e5f1, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.0012
+      objectReference: {fileID: 0}
+    - target: {fileID: 581590685110307575, guid: 7bd406bfaf973f0469ae7567dc98e5f1, type: 3}
+      propertyPath: m_ConstrainProportionsScale
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 3971256074993919069, guid: 7bd406bfaf973f0469ae7567dc98e5f1, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0

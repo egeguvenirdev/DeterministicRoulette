@@ -244,13 +244,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5474631607912792345}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: 0.17364818, w: 0.9848078}
+  m_LocalRotation: {x: 0, y: 0, z: -0.5735764, w: 0.8191521}
   m_LocalPosition: {x: 0, y: 0, z: 0.0011999961}
   m_LocalScale: {x: 1.1999999, y: 1.2000002, z: 1.2000002}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 2841533783450339548}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 20}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: -70}
 --- !u!33 &254520906032025581
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -485,9 +485,14 @@ MonoBehaviour:
   orbitHeight: 0.0225
   pocketHeight: 0.0192
   settleDropFromHeightOffset: 0.012
-  settleAngleJitter: 0.05
-  settleRadiusJitter: 0.0015
-  settleHeightJitter: 0.001
+  ballFastPhaseDuration: 0.38
+  ballSlowPhaseDuration: 0.42
+  ballFastPhaseSpeed: 1
+  ballSlowPhaseSpeed: 0.55
+  ballFinalPhaseSpeed: 0.22
+  settleAngleJitter: 0.025
+  settleRadiusJitter: 0.00075
+  settleHeightJitter: 0.0005
 --- !u!1 &8741843030537494928
 GameObject:
   m_ObjectHideFlags: 0

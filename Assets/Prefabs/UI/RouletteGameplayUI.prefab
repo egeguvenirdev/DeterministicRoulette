@@ -3866,6 +3866,8 @@ MonoBehaviour:
   winningNumberText: {fileID: 2560643266715625940}
   winningsAmountText: {fileID: 6243164148305986367}
   statsText: {fileID: 9160181369591350414}
+  wheelAnimator: {fileID: 0}
+  waitForWheelAnimation: 1
 --- !u!114 &5065051366590406249
 MonoBehaviour:
   m_ObjectHideFlags: 0

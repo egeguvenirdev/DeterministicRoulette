@@ -35,6 +35,9 @@ public class GameUIController : MonoBehaviour
     [SerializeField] private RouletteWheelAnimator wheelAnimator;
     [SerializeField] private bool waitForWheelAnimation = true;
 
+    [Header("Bet Board")]
+    [SerializeField] private RouletteBetBoardController betBoardController;
+
     private OutcomeSelector outcomeSelector;
     private BetManager betManager;
     private RouletteGameManager gameManager;
@@ -101,6 +104,7 @@ public class GameUIController : MonoBehaviour
         WireButtons();
         BindRoundCompleted();
         BindWheelAnimator();
+        BindBetBoardController();
 
         initialized = true;
         RefreshView();
@@ -115,6 +119,7 @@ public class GameUIController : MonoBehaviour
         }
 
         UnbindWheelAnimator();
+        UnbindBetBoardController();
 
         UnwireButtons();
     }
@@ -578,7 +583,41 @@ public class GameUIController : MonoBehaviour
             flowService.ClearAllBets();
         }
 
+        if (betBoardController != null)
+        {
+            betBoardController.ClearChipVisuals();
+        }
+
         RefreshView();
+    }
+
+    public bool TryAddStraightBetForNumber(int targetNumber)
+    {
+        if (!initialized || flowService == null)
+        {
+            return false;
+        }
+
+        if (targetNumber < 0 || targetNumber > 36)
+        {
+            Debug.LogWarning("Target number out of range.");
+            return false;
+        }
+
+        if (!TryGetStake(out int stake))
+        {
+            Debug.LogWarning("Invalid stake");
+            return false;
+        }
+
+        if (!flowService.TryAddStraightBet(targetNumber, stake))
+        {
+            Debug.LogWarning("Bet rejected");
+            return false;
+        }
+
+        RefreshView();
+        return true;
     }
 
     private bool TryGetStake(out int stake)
@@ -728,6 +767,11 @@ public class GameUIController : MonoBehaviour
         {
             togglePanelButton.interactable = interactable;
         }
+
+        if (betBoardController != null)
+        {
+            betBoardController.SetBoardInteractable(interactable);
+        }
     }
     
     private bool IsRedNumber(int number)
@@ -761,6 +805,11 @@ public class GameUIController : MonoBehaviour
         if (betsText != null && flowService != null)
         {
             betsText.text = "Bets: " + flowService.GetActiveBetCount() + "  Stake: " + flowService.GetTotalStake();
+        }
+
+        if (betBoardController != null && flowService != null && flowService.GetActiveBetCount() == 0)
+        {
+            betBoardController.ClearChipVisuals();
         }
     }
 
@@ -798,6 +847,31 @@ public class GameUIController : MonoBehaviour
         {
             wheelAnimator = FindFirstObjectByType<RouletteWheelAnimator>();
         }
+
+        if (betBoardController == null)
+        {
+            betBoardController = FindFirstObjectByType<RouletteBetBoardController>();
+        }
+    }
+
+    private void BindBetBoardController()
+    {
+        if (betBoardController == null)
+        {
+            return;
+        }
+
+        betBoardController.Initialize(this);
+    }
+
+    private void UnbindBetBoardController()
+    {
+        if (betBoardController == null)
+        {
+            return;
+        }
+
+        betBoardController.Initialize(null);
     }
 
     private void BindRoundCompleted()

@@ -24,7 +24,13 @@ public class GameBootstrapper : MonoBehaviour
             return;
         }
 
-        gameManager.Configure(outcomeSelector, payoutCalculator, betManager, statisticsManager);
+        if (!WireDependencies())
+        {
+            Debug.LogError("[Bootstrapper] Failed to wire dependencies. Initialization aborted.", this);
+            enabled = false;
+            return;
+        }
+
         gameUIController.Initialize(outcomeSelector, betManager, gameManager, statisticsManager);
     }
 
@@ -75,5 +81,21 @@ public class GameBootstrapper : MonoBehaviour
                statisticsManager != null &&
                gameManager != null &&
                gameUIController != null;
+    }
+
+    private bool WireDependencies()
+    {
+        IOutcomeService outcomeService = outcomeSelector;
+        IPayoutService payoutService = payoutCalculator;
+        IBetService betService = betManager;
+        IStatisticsService statsService = statisticsManager;
+
+        if (outcomeService == null || payoutService == null || betService == null || statsService == null)
+        {
+            return false;
+        }
+
+        gameManager.Configure(outcomeService, payoutService, betService, statsService);
+        return true;
     }
 }

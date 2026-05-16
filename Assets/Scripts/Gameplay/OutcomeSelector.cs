@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class OutcomeSelector : MonoBehaviour
+public class OutcomeSelector : MonoBehaviour, IOutcomeService
 {
     private RouletteRulesDatabase rulesDb;
     private int selectedNumber = -1;
@@ -25,6 +25,13 @@ public class OutcomeSelector : MonoBehaviour
     
     public int GetOutcome()
     {
+        EnsureRulesDatabase();
+
+        if (rulesDb == null)
+        {
+            return 0;
+        }
+
         if (selectedNumber >= 0)
         {
             return selectedNumber;
@@ -43,5 +50,13 @@ public class OutcomeSelector : MonoBehaviour
     public bool HasSelection()
     {
         return selectedNumber >= 0;
+    }
+
+    private void EnsureRulesDatabase()
+    {
+        if (rulesDb == null)
+        {
+            rulesDb = RouletteRulesDatabase.Instance;
+        }
     }
 }

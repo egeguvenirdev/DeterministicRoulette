@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-public class PayoutCalculator : MonoBehaviour
+public class PayoutCalculator : MonoBehaviour, IPayoutService
 {
     private RouletteRulesDatabase rulesDb;
     
@@ -12,6 +12,13 @@ public class PayoutCalculator : MonoBehaviour
     
     public int CalculateWinnings(int resultNumber, List<BetData> bets)
     {
+        EnsureRulesDatabase();
+
+        if (rulesDb == null)
+        {
+            return 0;
+        }
+
         int totalWinnings = 0;
         var resultData = rulesDb.GetNumberData(resultNumber);
         
@@ -29,6 +36,13 @@ public class PayoutCalculator : MonoBehaviour
     
     public List<BetData> GetWinningBets(int resultNumber, List<BetData> bets)
     {
+        EnsureRulesDatabase();
+
+        if (rulesDb == null)
+        {
+            return new List<BetData>();
+        }
+
         var winning = new List<BetData>();
         var resultData = rulesDb.GetNumberData(resultNumber);
         
@@ -90,6 +104,14 @@ public class PayoutCalculator : MonoBehaviour
             
             default:
                 return false;
+        }
+    }
+
+    private void EnsureRulesDatabase()
+    {
+        if (rulesDb == null)
+        {
+            rulesDb = RouletteRulesDatabase.Instance;
         }
     }
 }

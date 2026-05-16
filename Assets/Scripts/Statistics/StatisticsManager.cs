@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class StatisticsManager : MonoBehaviour
+public class StatisticsManager : MonoBehaviour, IStatisticsService
 {
     [SerializeField] private int startingChips = 1000;
 

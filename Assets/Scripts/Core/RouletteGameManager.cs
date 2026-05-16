@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class RouletteGameManager : MonoBehaviour
@@ -9,70 +8,88 @@ public class RouletteGameManager : MonoBehaviour
     [SerializeField] private BetManager betManager;
     [SerializeField] private StatisticsManager statisticsManager;
 
+    private IOutcomeService configuredOutcomeService;
+    private IPayoutService configuredPayoutService;
+    private IBetService configuredBetService;
+    private IStatisticsService configuredStatisticsService;
+    private RouletteRoundService roundService;
+
     public event Action<RoundResultData> RoundCompleted;
 
-    public void Configure(
-        OutcomeSelector selector,
-        PayoutCalculator calculator,
-        BetManager manager,
-        StatisticsManager stats)
+    private void Awake()
     {
-        outcomeSelector = selector;
-        payoutCalculator = calculator;
-        betManager = manager;
-        statisticsManager = stats;
+        BuildRoundServiceFromSerializedReferences();
+    }
+
+    public void Configure(
+        IOutcomeService selector,
+        IPayoutService calculator,
+        IBetService manager,
+        IStatisticsService stats)
+    {
+        configuredOutcomeService = selector;
+        configuredPayoutService = calculator;
+        configuredBetService = manager;
+        configuredStatisticsService = stats;
+        roundService = new RouletteRoundService(configuredOutcomeService, configuredPayoutService, configuredBetService, configuredStatisticsService);
     }
 
     public bool CanSpin()
     {
-        if (outcomeSelector == null || payoutCalculator == null || betManager == null || statisticsManager == null)
-        {
-            return false;
-        }
-
-        int totalStake = betManager.GetTotalStake();
-        return totalStake > 0 && statisticsManager.CanAfford(totalStake);
+        EnsureRoundService();
+        return roundService != null && roundService.CanSpin();
     }
 
     public RoundResultData Spin()
     {
-        if (!CanSpin())
+        EnsureRoundService();
+
+        if (roundService == null)
         {
             return null;
         }
 
-        int selectedNumber = outcomeSelector.HasSelection() ? outcomeSelector.GetSelectedNumber() : -1;
-        int resultNumber = outcomeSelector.GetOutcome();
-        List<BetData> currentBets = betManager.GetBetSnapshot();
-        List<BetData> winningBets = payoutCalculator.GetWinningBets(resultNumber, currentBets);
-        int totalStake = betManager.GetTotalStake();
-        int totalWinnings = payoutCalculator.CalculateWinnings(resultNumber, currentBets);
+        RoundResultData roundResult = roundService.Spin();
 
-        RoundResultData roundResult = new RoundResultData
+        if (roundResult == null)
         {
-            selectedNumber = selectedNumber,
-            resultNumber = resultNumber,
-            winningBets = winningBets,
-            losingBets = GetLosingBets(currentBets, winningBets),
-            totalWinnings = totalWinnings,
-            totalLosses = Mathf.Max(0, totalStake - totalWinnings)
-        };
+            return null;
+        }
 
-        statisticsManager.ApplyRound(roundResult, totalStake);
-        betManager.ClearBets();
         RoundCompleted?.Invoke(roundResult);
         return roundResult;
     }
 
-    private List<BetData> GetLosingBets(List<BetData> allBets, List<BetData> winningBets)
+    private void EnsureRoundService()
     {
-        List<BetData> losingBets = new List<BetData>(allBets);
-
-        for (int i = 0; i < winningBets.Count; i++)
+        if (roundService != null)
         {
-            losingBets.Remove(winningBets[i]);
+            return;
         }
 
-        return losingBets;
+        if (configuredOutcomeService != null &&
+            configuredPayoutService != null &&
+            configuredBetService != null &&
+            configuredStatisticsService != null)
+        {
+            roundService = new RouletteRoundService(configuredOutcomeService, configuredPayoutService, configuredBetService, configuredStatisticsService);
+            return;
+        }
+
+        BuildRoundServiceFromSerializedReferences();
+    }
+
+    private void BuildRoundServiceFromSerializedReferences()
+    {
+        if (outcomeSelector == null || payoutCalculator == null || betManager == null || statisticsManager == null)
+        {
+            return;
+        }
+
+        configuredOutcomeService = outcomeSelector;
+        configuredPayoutService = payoutCalculator;
+        configuredBetService = betManager;
+        configuredStatisticsService = statisticsManager;
+        roundService = new RouletteRoundService(configuredOutcomeService, configuredPayoutService, configuredBetService, configuredStatisticsService);
     }
 }

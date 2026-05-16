@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BetManager : MonoBehaviour
+public class BetManager : MonoBehaviour, IBetService
 {
     private readonly List<BetData> activeBets = new List<BetData>();
 

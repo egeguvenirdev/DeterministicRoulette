@@ -41,6 +41,11 @@ public class RouletteWheelAnimator : MonoBehaviour
     [Header("Pocket Mapping")]
     [SerializeField] private float pocketAngleOffset = 0f;
     [SerializeField] private float settleBallAngle = 90f;
+    [SerializeField] private float settleBallAngleRandomRange = 360f;
+
+    [Header("Spin Randomization")]
+    [SerializeField] private float wheelStartRandomAngleRange = 360f;
+    [SerializeField] private float ballStartRandomAngleRange = 360f;
 
     [Header("Ball Spiral")]
     [SerializeField] private float outerOrbitRadius = 0.5f;
@@ -76,19 +81,12 @@ public class RouletteWheelAnimator : MonoBehaviour
     private bool bound;
     private Quaternion wheelBaseLocalRotation;
     private Quaternion ballContainerBaseLocalRotation;
+    private bool baseRotationsCaptured;
 
     private void Awake()
     {
         RecalculateDurations();
-        if (wheelSpin != null)
-        {
-            wheelBaseLocalRotation = wheelSpin.localRotation;
-        }
-
-        if (ballContainer != null)
-        {
-            ballContainerBaseLocalRotation = ballContainer.localRotation;
-        }
+        CaptureBaseRotationsIfNeeded(true);
 
         if (ballContainer != null && ball != null)
         {
@@ -128,6 +126,9 @@ public class RouletteWheelAnimator : MonoBehaviour
         settleDuration = Mathf.Max(0.01f, settleDuration);
         finalRadius = Mathf.Max(0f, finalRadius);
         settleDropFromHeightOffset = Mathf.Max(0f, settleDropFromHeightOffset);
+        settleBallAngleRandomRange = Mathf.Clamp(settleBallAngleRandomRange, 0f, 360f);
+        wheelStartRandomAngleRange = Mathf.Max(0f, wheelStartRandomAngleRange);
+        ballStartRandomAngleRange = Mathf.Max(0f, ballStartRandomAngleRange);
 
         ballFastPhaseDuration = Mathf.Clamp(ballFastPhaseDuration, 0.05f, 0.9f);
         ballSlowPhaseDuration = Mathf.Clamp(ballSlowPhaseDuration, 0.05f, 0.9f - ballFastPhaseDuration);
@@ -183,8 +184,7 @@ public class RouletteWheelAnimator : MonoBehaviour
             return;
         }
 
-        wheelBaseLocalRotation = wheelSpin.localRotation;
-        ballContainerBaseLocalRotation = ballContainer.localRotation;
+        CaptureBaseRotationsIfNeeded(false);
 
         if (activeSpinRoutine != null)
         {
@@ -192,6 +192,29 @@ public class RouletteWheelAnimator : MonoBehaviour
         }
 
         activeSpinRoutine = StartCoroutine(PlaySpinAnimation(roundResult));
+    }
+
+    private void CaptureBaseRotationsIfNeeded(bool force)
+    {
+        if (!force && baseRotationsCaptured)
+        {
+            return;
+        }
+
+        if (wheelSpin != null)
+        {
+            wheelBaseLocalRotation = wheelSpin.localRotation;
+        }
+
+        if (ballContainer != null)
+        {
+            ballContainerBaseLocalRotation = ballContainer.localRotation;
+        }
+
+        if (wheelSpin != null && ballContainer != null)
+        {
+            baseRotationsCaptured = true;
+        }
     }
 
     private void HandleRoundCompleted(RoundResultData roundResult)
@@ -218,21 +241,29 @@ public class RouletteWheelAnimator : MonoBehaviour
 
         float wheelSign = wheelDirection > 0 ? 1f : -1f;
         float ballSign = ballDirection > 0 ? 1f : -1f;
-        float startBallAngle = ballAngle;
+        float settleAngleForSpin = NormalizeAngle(settleBallAngle + GetRandomCenteredOffset(settleBallAngleRandomRange));
+
+        float startWheelAngle = GetRandomStartAngle(wheelStartRandomAngleRange);
+        float startBallAngle = GetRandomStartAngle(ballStartRandomAngleRange);
+
+        wheelAngle = startWheelAngle;
+        ballAngle = startBallAngle;
+
+        ApplyWheelAngle(wheelAngle);
+        PlaceBall(ballAngle, outerOrbitRadius, orbitHeight);
 
         float pocketStep = 360f / EuropeanOrder.Length;
         float pocketAngle = pocketAngleOffset + pocketIndex * pocketStep;
 
-        float desiredWheelModulo = NormalizeAngle(settleBallAngle - pocketAngle);
+        float desiredWheelModulo = NormalizeAngle(settleAngleForSpin - pocketAngle);
         float targetWheelAngle = ComputeTargetWheelAngleByTurns(wheelAngle, desiredWheelModulo, wheelTurns, wheelSign);
-        float targetBallAngle = ComputeTargetWheelAngleByTurns(startBallAngle, settleBallAngle, ballTurns, ballSign);
+        float targetBallAngle = ComputeTargetWheelAngleByTurns(startBallAngle, settleAngleForSpin, ballTurns, ballSign);
         float totalBallDistance = Mathf.Abs(targetBallAngle - startBallAngle);
 
         float motionDuration = Mathf.Max(computedWheelDuration, computedBallDuration);
         motionDuration = Mathf.Max(0.01f, motionDuration);
 
         float elapsed = 0f;
-        float startWheelAngle = wheelAngle;
 
         while (elapsed < motionDuration)
         {
@@ -267,7 +298,7 @@ public class RouletteWheelAnimator : MonoBehaviour
         ballAngle = targetBallAngle;
         PlaceBall(ballAngle, finalRadius, pocketHeight);
 
-        yield return StartCoroutine(PlaySettleJitter());
+        yield return StartCoroutine(PlaySettleJitter(settleAngleForSpin));
 
         PlaceBall(ballAngle, finalRadius, pocketHeight);
         activeSpinRoutine = null;
@@ -275,7 +306,7 @@ public class RouletteWheelAnimator : MonoBehaviour
         SpinAnimationCompleted?.Invoke(roundResult);
     }
 
-    private IEnumerator PlaySettleJitter()
+    private IEnumerator PlaySettleJitter(float settleAngle)
     {
         float elapsed = 0f;
         while (elapsed < settleDuration)
@@ -289,7 +320,7 @@ public class RouletteWheelAnimator : MonoBehaviour
             float heightNoise = Mathf.Sin(t * Mathf.PI * 12f + 1.2f) * settleHeightJitter * damping;
 
             PlaceBall(
-                settleBallAngle + angleNoise,
+                settleAngle + angleNoise,
                 finalRadius + radiusNoise,
                 pocketHeight + heightNoise);
 
@@ -312,6 +343,27 @@ public class RouletteWheelAnimator : MonoBehaviour
         }
 
         wheelSpin.localRotation = wheelBaseLocalRotation * Quaternion.AngleAxis(absoluteAngle, Vector3.forward);
+    }
+
+    private static float GetRandomStartAngle(float range)
+    {
+        if (range <= 0f)
+        {
+            return 0f;
+        }
+
+        return UnityEngine.Random.Range(0f, range);
+    }
+
+    private static float GetRandomCenteredOffset(float range)
+    {
+        if (range <= 0f)
+        {
+            return 0f;
+        }
+
+        float half = range * 0.5f;
+        return UnityEngine.Random.Range(-half, half);
     }
 
     private void PlaceBall(float localAngleDeg, float radius, float localHeight)

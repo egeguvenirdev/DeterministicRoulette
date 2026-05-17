@@ -28,12 +28,9 @@ public class GameUIController : MonoBehaviour
     [Header("Bet Board")]
     [SerializeField] private RouletteBetBoardController betBoardController;
 
-    [Header("Gameplay Dependencies")]
-    [SerializeField] private OutcomeSelector outcomeSelector;
-    [SerializeField] private BetManager betManager;
-    [SerializeField] private RouletteGameManager gameManager;
-    [SerializeField] private StatisticsManager statisticsManager;
-    private RouletteGameFlowService flowService;
+    [Header("Gameplay Facade")]
+    [SerializeField] private GameUiFacade gameFacade;
+
     private bool initialized;
     private bool roundCompletedBound;
     private bool wheelAnimatorBound;
@@ -46,18 +43,7 @@ public class GameUIController : MonoBehaviour
 
     private void Start()
     {
-        if (initialized)
-        {
-            return;
-        }
-
-        if (HasDependencies())
-        {
-            Initialize(outcomeSelector, betManager, gameManager, statisticsManager);
-            return;
-        }
-
-        Debug.LogError($"[GameUIController] Missing gameplay dependencies in Inspector: {GetMissingGameplayDependencies()}", this);
+        Initialize();
     }
 
     private void OnEnable()
@@ -74,25 +60,26 @@ public class GameUIController : MonoBehaviour
         BindBetBoardController();
     }
 
-    public void Initialize(
-        OutcomeSelector selector,
-        BetManager manager,
-        RouletteGameManager rouletteGameManager,
-        StatisticsManager stats)
+    public void Initialize()
     {
-        outcomeSelector = selector;
-        betManager = manager;
-        gameManager = rouletteGameManager;
-        statisticsManager = stats;
+        if (initialized)
+        {
+            return;
+        }
 
         if (!HasDependencies())
         {
-            Debug.LogError("[GameUIController] Missing gameplay dependencies during initialization.", this);
+            Debug.LogError($"[GameUIController] Missing gameplay facade in Inspector: {GetMissingGameplayDependencies()}", this);
             initialized = false;
             return;
         }
 
-        flowService = new RouletteGameFlowService(betManager, gameManager, outcomeSelector, statisticsManager);
+        if (!gameFacade.IsReady)
+        {
+            Debug.LogError($"[GameUIController] Game facade is not ready. Missing: {gameFacade.GetMissingDependencies()}", this);
+            initialized = false;
+            return;
+        }
 
         WireButtons();
         BindRoundCompleted();
@@ -105,9 +92,9 @@ public class GameUIController : MonoBehaviour
 
     private void OnDisable()
     {
-        if (gameManager != null && roundCompletedBound)
+        if (gameFacade != null && roundCompletedBound)
         {
-            gameManager.RoundCompleted -= HandleRoundCompleted;
+            gameFacade.RoundCompleted -= HandleRoundCompleted;
             roundCompletedBound = false;
         }
 
@@ -197,7 +184,7 @@ public class GameUIController : MonoBehaviour
 
     private void Spin()
     {
-        if (!initialized || flowService == null)
+        if (!initialized || gameFacade == null || !gameFacade.IsReady)
         {
             return;
         }
@@ -209,7 +196,7 @@ public class GameUIController : MonoBehaviour
             SetControlsInteractable(false);
         }
 
-        if (!gameManager.CanSpin())
+        if (!gameFacade.CanSpin())
         {
             Debug.LogWarning("Cannot spin");
             RefreshView();
@@ -217,7 +204,7 @@ public class GameUIController : MonoBehaviour
             return;
         }
 
-        RoundResultData roundResult = flowService.ExecuteSpin();
+        RoundResultData roundResult = gameFacade.ExecuteSpin();
 
         if (roundResult == null)
         {
@@ -234,25 +221,25 @@ public class GameUIController : MonoBehaviour
 
     private void ApplySelection()
     {
-        if (targetNumberDropdown == null || flowService == null)
+        if (targetNumberDropdown == null || gameFacade == null)
         {
             return;
         }
 
         if (targetNumberDropdown.value == 0)
         {
-            flowService.ClearOutcomeSelection();
+            gameFacade.ClearOutcomeSelection();
             return;
         }
 
-        flowService.SetOutcomeSelection(targetNumberDropdown.value - 1);
+        gameFacade.SetOutcomeSelection(targetNumberDropdown.value - 1);
     }
 
     private void ClearSelection()
     {
-        if (flowService != null)
+        if (gameFacade != null)
         {
-            flowService.ClearOutcomeSelection();
+            gameFacade.ClearOutcomeSelection();
         }
 
         if (targetNumberDropdown != null)
@@ -266,9 +253,9 @@ public class GameUIController : MonoBehaviour
 
     private void ClearBets()
     {
-        if (flowService != null)
+        if (gameFacade != null)
         {
-            flowService.ClearAllBets();
+            gameFacade.ClearAllBets();
         }
 
         if (betBoardController != null)
@@ -281,9 +268,9 @@ public class GameUIController : MonoBehaviour
 
     public bool TryAddStraightBetForNumber(int targetNumber)
     {
-        if (!initialized || flowService == null)
+        if (!initialized || gameFacade == null || !gameFacade.IsReady)
         {
-            Debug.LogWarning("[GameUIController] UI is not initialized. Check serialized gameplay dependencies and bootstrap wiring.", this);
+            Debug.LogWarning("[GameUIController] UI is not initialized. Check serialized gameplay facade wiring.", this);
             return false;
         }
 
@@ -299,7 +286,7 @@ public class GameUIController : MonoBehaviour
             return false;
         }
 
-        if (!flowService.TryAddStraightBet(targetNumber, stake))
+        if (!gameFacade.TryAddStraightBet(targetNumber, stake))
         {
             Debug.LogWarning("Bet rejected");
             return false;
@@ -457,9 +444,9 @@ public class GameUIController : MonoBehaviour
 
     private void RefreshView()
     {
-        if (flowService != null)
+        if (gameFacade != null)
         {
-            GameStateData state = flowService.GetGameState();
+            GameStateData state = gameFacade.GetGameState();
 
             if (state == null)
             {
@@ -477,12 +464,12 @@ public class GameUIController : MonoBehaviour
             }
         }
 
-        if (betsText != null && flowService != null)
+        if (betsText != null && gameFacade != null)
         {
-            betsText.text = "Bets: " + flowService.GetActiveBetCount() + "  Stake: " + flowService.GetTotalStake();
+            betsText.text = "Bets: " + gameFacade.GetActiveBetCount() + "  Stake: " + gameFacade.GetTotalStake();
         }
 
-        if (betBoardController != null && flowService != null && flowService.GetActiveBetCount() == 0)
+        if (betBoardController != null && gameFacade != null && gameFacade.GetActiveBetCount() == 0)
         {
             betBoardController.ClearChipVisuals();
         }
@@ -490,34 +477,16 @@ public class GameUIController : MonoBehaviour
 
     private bool HasDependencies()
     {
-        return outcomeSelector != null &&
-               betManager != null &&
-               gameManager != null &&
-               statisticsManager != null;
+        return gameFacade != null;
     }
 
     private string GetMissingGameplayDependencies()
     {
         List<string> missing = new List<string>();
 
-        if (outcomeSelector == null)
+        if (gameFacade == null)
         {
-            missing.Add(nameof(outcomeSelector));
-        }
-
-        if (betManager == null)
-        {
-            missing.Add(nameof(betManager));
-        }
-
-        if (gameManager == null)
-        {
-            missing.Add(nameof(gameManager));
-        }
-
-        if (statisticsManager == null)
-        {
-            missing.Add(nameof(statisticsManager));
+            missing.Add(nameof(gameFacade));
         }
 
         return string.Join(", ", missing);
@@ -545,13 +514,13 @@ public class GameUIController : MonoBehaviour
 
     private void BindRoundCompleted()
     {
-        if (gameManager == null || roundCompletedBound)
+        if (gameFacade == null || roundCompletedBound)
         {
             return;
         }
 
-        gameManager.RoundCompleted -= HandleRoundCompleted;
-        gameManager.RoundCompleted += HandleRoundCompleted;
+        gameFacade.RoundCompleted -= HandleRoundCompleted;
+        gameFacade.RoundCompleted += HandleRoundCompleted;
         roundCompletedBound = true;
     }
 }

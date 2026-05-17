@@ -2732,12 +2732,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7e3bd9b457c71b64295a4a23d4e6c9ac, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameUIController
-  slidingPanel: {fileID: 2471379679253687130}
-  togglePanelButton: {fileID: 0}
-  togglePanelButtonText: {fileID: 0}
-  startCollapsed: 1
-  panelClosedX: 1120
-  panelSlideDuration: 0.22
   targetNumberDropdown: {fileID: 1094426633763323350}
   stakeInput: {fileID: 2009380031924026012}
   spinButton: {fileID: 7395316378633570139}
@@ -2751,6 +2745,7 @@ MonoBehaviour:
   wheelAnimator: {fileID: 750719448}
   waitForWheelAnimation: 1
   betBoardController: {fileID: 2028901236}
+  gameFacade: {fileID: 2028901237}
 --- !u!1 &785381052
 GameObject:
   m_ObjectHideFlags: 0
@@ -6355,6 +6350,7 @@ GameObject:
   - component: {fileID: 2028901230}
   - component: {fileID: 2028901229}
   - component: {fileID: 2028901236}
+  - component: {fileID: 2028901237}
   m_Layer: 0
   m_Name: GameSystems
   m_TagString: Untagged
@@ -6468,6 +6464,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RouletteBetBoardController
   gameUIController: {fileID: 780949986}
+  boardCanvas: {fileID: 0}
   chipLayerParent: {fileID: 801210459}
   chipVisualPrefab: {fileID: 6857391570688449040, guid: aae97c5ed7554314a8e17363a339294a, type: 3}
   cells:
@@ -6508,6 +6505,22 @@ MonoBehaviour:
   - {fileID: 1611111766}
   - {fileID: 740844648}
   - {fileID: 1650253077}
+--- !u!114 &2028901237
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2028901228}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8e99511eaa539e24cbe2693cf88509de, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GameUiFacade
+  outcomeSelector: {fileID: 2028901232}
+  betManager: {fileID: 2028901230}
+  gameManager: {fileID: 2028901234}
+  statisticsManager: {fileID: 2028901229}
 --- !u!114 &27903810836825492
 MonoBehaviour:
   m_ObjectHideFlags: 0

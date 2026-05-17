@@ -27,7 +27,7 @@ public class GameBootstrapper : MonoBehaviour
             return;
         }
 
-        gameUIController.Initialize(outcomeSelector, betManager, gameManager, statisticsManager);
+        gameUIController.Initialize();
     }
 
     private bool HasRequiredReferences()

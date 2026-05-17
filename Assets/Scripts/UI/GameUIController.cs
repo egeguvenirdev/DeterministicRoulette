@@ -40,7 +40,6 @@ public class GameUIController : MonoBehaviour
 
     private void Awake()
     {
-        ResolveViewReferences();
         SetupDropdowns();
     }
 
@@ -61,7 +60,6 @@ public class GameUIController : MonoBehaviour
 
     private void OnEnable()
     {
-        ResolveViewReferences();
         WireButtons();
     }
 
@@ -85,7 +83,6 @@ public class GameUIController : MonoBehaviour
 
         flowService = new RouletteGameFlowService(betManager, gameManager, outcomeSelector, statisticsManager);
 
-        ResolveViewReferences();
         WireButtons();
         BindRoundCompleted();
         BindWheelAnimator();
@@ -112,127 +109,6 @@ public class GameUIController : MonoBehaviour
     private void SetupDropdowns()
     {
         SetupDropdown(targetNumberDropdown, true);
-    }
-
-    private void ResolveViewReferences()
-    {
-        if (targetNumberDropdown == null)
-        {
-            TMP_Dropdown dropdown = FindByPathOrName<TMP_Dropdown>("Panel_OutcomeControls/Dropdown_TargetOutcome", "Dropdown_TargetOutcome", "TargetOutcome");
-            if (dropdown != null)
-            {
-                targetNumberDropdown = dropdown;
-            }
-        }
-
-        if (stakeInput == null)
-        {
-            TMP_InputField input = FindByPathOrName<TMP_InputField>("Panel_BetControls/Input_StakeAmount", "Input_StakeAmount", "StakeAmount");
-            if (input != null)
-            {
-                stakeInput = input;
-            }
-        }
-
-        if (clearBetsButton == null)
-        {
-            Button button = FindByPathOrName<Button>("Panel_BetControls/Row_BetButtons/Button_ClearBets", "Button_ClearBets", "ClearBets");
-            if (button != null)
-            {
-                clearBetsButton = button;
-            }
-        }
-
-        if (clearSelectionButton == null)
-        {
-            Button button = FindByPathOrName<Button>("Panel_OutcomeControls/Row_OutcomeButtons/Button_ClearSelection", "Button_ClearSelection", "ClearSelection");
-            if (button != null)
-            {
-                clearSelectionButton = button;
-            }
-        }
-
-        if (spinButton == null)
-        {
-            Button button = FindByPathOrName<Button>("Panel_OutcomeControls/Row_OutcomeButtons/Button_Spin", "Button_Spin", "Spin");
-            if (button != null)
-            {
-                spinButton = button;
-            }
-        }
-
-        if (chipsText == null)
-        {
-            TMP_Text label = FindByPathOrName<TMP_Text>("Panel_TopStatus/Text_Chips", "Text_Chips", "Chips");
-            if (label != null)
-            {
-                chipsText = label;
-            }
-        }
-
-        if (statsText == null)
-        {
-            TMP_Text label = FindByPathOrName<TMP_Text>("Panel_TopStatus/Text_Stats", "Text_Stats", "Stats");
-            if (label != null)
-            {
-                statsText = label;
-            }
-        }
-
-        if (betsText == null)
-        {
-            TMP_Text label = FindByPathOrName<TMP_Text>("Panel_Result/Text_BetsSummary", "Text_BetsSummary", "BetsSummary");
-            if (label != null)
-            {
-                betsText = label;
-            }
-        }
-
-        if (winningNumberText == null)
-        {
-            TMP_Text label = FindByPathOrName<TMP_Text>("Panel_Result/Text_WinningNumber", "Text_WinningNumber", "WinningNumber");
-            if (label != null)
-            {
-                winningNumberText = label;
-            }
-        }
-
-        if (winningsAmountText == null)
-        {
-            TMP_Text label = FindByPathOrName<TMP_Text>("Panel_Result/Text_WinningsAmount", "Text_WinningsAmount", "WinningsAmount");
-            if (label != null)
-            {
-                winningsAmountText = label;
-            }
-        }
-    }
-
-    private T FindByPathOrName<T>(string path, params string[] nameHints) where T : Component
-    {
-        Transform byPath = transform.Find(path);
-        if (byPath != null)
-        {
-            T byPathComponent = byPath.GetComponent<T>();
-            if (byPathComponent != null)
-            {
-                return byPathComponent;
-            }
-        }
-
-        T[] all = GetComponentsInChildren<T>(true);
-        for (int i = 0; i < all.Length; i++)
-        {
-            string candidateName = all[i].name;
-            for (int j = 0; j < nameHints.Length; j++)
-            {
-                if (candidateName.IndexOf(nameHints[j], System.StringComparison.OrdinalIgnoreCase) >= 0)
-                {
-                    return all[i];
-                }
-            }
-        }
-
-        return null;
     }
 
     private void SetupDropdown(TMP_Dropdown dropdown, bool includeRandom)

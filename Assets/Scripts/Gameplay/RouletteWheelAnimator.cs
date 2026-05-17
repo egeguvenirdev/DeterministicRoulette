@@ -69,6 +69,17 @@ public class RouletteWheelAnimator : MonoBehaviour
     [SerializeField] private float settleRadiusJitter = 0.008f;
     [SerializeField] private float settleHeightJitter = 0.004f;
 
+    [Header("Late White Ring Drift")]
+    [SerializeField, Range(0f, 100f)] private float whiteRingEntryChancePercent = 40f;
+    [SerializeField] private float whiteRingRadius = 0.22f;
+    [SerializeField] private float whiteRingStartTurnsMin = 1f;
+    [SerializeField] private float whiteRingStartTurnsMax = 2f;
+    [SerializeField] private float whiteRingBlendStrength = 0.8f;
+    [SerializeField] private float whiteRingEllipseAmplitude = 0.02f;
+    [SerializeField] private float whiteRingEllipseCycles = 2.2f;
+    [SerializeField] private float whiteRingAngleJitter = 4.5f;
+    [SerializeField] private float whiteRingHeightLift = 0.008f;
+
     public event Action SpinAnimationStarted;
     public event Action<RoundResultData> SpinAnimationCompleted;
 
@@ -140,6 +151,16 @@ public class RouletteWheelAnimator : MonoBehaviour
         ballFastPhaseSpeed = Mathf.Max(0.01f, ballFastPhaseSpeed);
         ballSlowPhaseSpeed = Mathf.Max(0.01f, ballSlowPhaseSpeed);
         ballFinalPhaseSpeed = Mathf.Max(0.01f, ballFinalPhaseSpeed);
+
+        whiteRingEntryChancePercent = Mathf.Clamp(whiteRingEntryChancePercent, 0f, 100f);
+        whiteRingRadius = Mathf.Max(0f, whiteRingRadius);
+        whiteRingStartTurnsMin = Mathf.Max(0.1f, whiteRingStartTurnsMin);
+        whiteRingStartTurnsMax = Mathf.Max(whiteRingStartTurnsMin, whiteRingStartTurnsMax);
+        whiteRingBlendStrength = Mathf.Clamp01(whiteRingBlendStrength);
+        whiteRingEllipseAmplitude = Mathf.Max(0f, whiteRingEllipseAmplitude);
+        whiteRingEllipseCycles = Mathf.Max(0f, whiteRingEllipseCycles);
+        whiteRingAngleJitter = Mathf.Max(0f, whiteRingAngleJitter);
+        whiteRingHeightLift = Mathf.Max(0f, whiteRingHeightLift);
         RecalculateDurations();
     }
 
@@ -260,6 +281,10 @@ public class RouletteWheelAnimator : MonoBehaviour
         float targetBallAngle = ComputeTargetWheelAngleByTurns(startBallAngle, settleAngleForSpin, ballTurns, ballSign);
         float totalBallDistance = Mathf.Abs(targetBallAngle - startBallAngle);
 
+        bool useWhiteRingDrift = UnityEngine.Random.value <= (whiteRingEntryChancePercent / 100f);
+        float whiteRingStartTurns = UnityEngine.Random.Range(whiteRingStartTurnsMin, whiteRingStartTurnsMax);
+        float whiteRingStartDistance = Mathf.Max(0.01f, whiteRingStartTurns) * 360f;
+
         float motionDuration = Mathf.Max(computedWheelDuration, computedBallDuration);
         motionDuration = Mathf.Max(0.01f, motionDuration);
 
@@ -290,7 +315,31 @@ public class RouletteWheelAnimator : MonoBehaviour
             float preHeight = Mathf.Lerp(orbitHeight, pocketHeight + settleDropFromHeightOffset, EaseOutCubic(preFinalProgress));
             float height = Mathf.Lerp(preHeight, pocketHeight, EaseOutCubic(finalProgress));
 
-            PlaceBall(ballAngle, radius, height);
+            float displayBallAngle = ballAngle;
+            if (useWhiteRingDrift)
+            {
+                float remainingDistance = Mathf.Abs(targetBallAngle - ballAngle);
+                float driftProgress = 1f - Mathf.Clamp01(remainingDistance / whiteRingStartDistance);
+
+                // Keep entry/exit smooth so ball can briefly visit inner white area and still settle cleanly.
+                float windowWeight = Mathf.Sin(Mathf.Clamp01(driftProgress) * Mathf.PI);
+                float blend = windowWeight * whiteRingBlendStrength;
+
+                if (blend > 0.0001f)
+                {
+                    float ellipsePhase = (1f - driftProgress) * Mathf.PI * 2f * whiteRingEllipseCycles;
+                    float ellipseOffset = Mathf.Sin(ellipsePhase + elapsed * 4.2f) * whiteRingEllipseAmplitude;
+                    float ringRadius = Mathf.Max(0f, whiteRingRadius + ellipseOffset);
+
+                    radius = Mathf.Lerp(radius, ringRadius, blend);
+                    height = Mathf.Lerp(height, pocketHeight + whiteRingHeightLift, blend * 0.6f);
+
+                    float angleNoise = Mathf.Sin(elapsed * 7.4f + ellipsePhase * 0.35f) * whiteRingAngleJitter * blend;
+                    displayBallAngle += angleNoise;
+                }
+            }
+
+            PlaceBall(displayBallAngle, radius, height);
             yield return null;
         }
 

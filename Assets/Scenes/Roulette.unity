@@ -8523,6 +8523,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 24ee7c09aedf21c4e95a7554b8804d16, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RouletteGameManager
+  rulesDatabase: {fileID: 0}
   outcomeSelector: {fileID: 2028901232}
   payoutCalculator: {fileID: 2028901231}
   betManager: {fileID: 2028901230}
@@ -13324,6 +13325,50 @@ PrefabInstance:
       propertyPath: gameManager
       value: 
       objectReference: {fileID: 2028901234}
+    - target: {fileID: 338645146910086270, guid: 7bd406bfaf973f0469ae7567dc98e5f1, type: 3}
+      propertyPath: settleDuration
+      value: 0.75
+      objectReference: {fileID: 0}
+    - target: {fileID: 338645146910086270, guid: 7bd406bfaf973f0469ae7567dc98e5f1, type: 3}
+      propertyPath: whiteRingRadius
+      value: 0.008
+      objectReference: {fileID: 0}
+    - target: {fileID: 338645146910086270, guid: 7bd406bfaf973f0469ae7567dc98e5f1, type: 3}
+      propertyPath: settleAngleJitter
+      value: 0.0125
+      objectReference: {fileID: 0}
+    - target: {fileID: 338645146910086270, guid: 7bd406bfaf973f0469ae7567dc98e5f1, type: 3}
+      propertyPath: ballSlowPhaseSpeed
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 338645146910086270, guid: 7bd406bfaf973f0469ae7567dc98e5f1, type: 3}
+      propertyPath: settleHeightJitter
+      value: 0.00025
+      objectReference: {fileID: 0}
+    - target: {fileID: 338645146910086270, guid: 7bd406bfaf973f0469ae7567dc98e5f1, type: 3}
+      propertyPath: settleRadiusJitter
+      value: 0.0005
+      objectReference: {fileID: 0}
+    - target: {fileID: 338645146910086270, guid: 7bd406bfaf973f0469ae7567dc98e5f1, type: 3}
+      propertyPath: ballFinalPhaseSpeed
+      value: 0.15
+      objectReference: {fileID: 0}
+    - target: {fileID: 338645146910086270, guid: 7bd406bfaf973f0469ae7567dc98e5f1, type: 3}
+      propertyPath: ballFastPhaseDuration
+      value: 0.3
+      objectReference: {fileID: 0}
+    - target: {fileID: 338645146910086270, guid: 7bd406bfaf973f0469ae7567dc98e5f1, type: 3}
+      propertyPath: ballSlowPhaseDuration
+      value: 0.305
+      objectReference: {fileID: 0}
+    - target: {fileID: 338645146910086270, guid: 7bd406bfaf973f0469ae7567dc98e5f1, type: 3}
+      propertyPath: computedTotalDuration
+      value: 5.25
+      objectReference: {fileID: 0}
+    - target: {fileID: 338645146910086270, guid: 7bd406bfaf973f0469ae7567dc98e5f1, type: 3}
+      propertyPath: whiteRingEntryChancePercent
+      value: 50
+      objectReference: {fileID: 0}
     - target: {fileID: 3971256074993919069, guid: 7bd406bfaf973f0469ae7567dc98e5f1, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0

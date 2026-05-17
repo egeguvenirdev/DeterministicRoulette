@@ -9,6 +9,7 @@ public class GameUiFacade : MonoBehaviour
     [SerializeField] private BetManager betManager;
     [SerializeField] private RouletteGameManager gameManager;
     [SerializeField] private StatisticsManager statisticsManager;
+    [SerializeField] private RouletteRulesDatabase rulesDatabase;
 
     private RouletteGameFlowService flowService;
     private bool roundCompletedBound;
@@ -142,16 +143,25 @@ public class GameUiFacade : MonoBehaviour
             missing.Add(nameof(statisticsManager));
         }
 
+        if (rulesDatabase == null)
+        {
+            missing.Add(nameof(rulesDatabase));
+        }
+
         return string.Join(", ", missing);
     }
 
     private void BuildFlowService()
     {
-        if (outcomeSelector == null || betManager == null || gameManager == null || statisticsManager == null)
+        if (outcomeSelector == null || betManager == null || gameManager == null || statisticsManager == null || rulesDatabase == null)
         {
             flowService = null;
             return;
         }
+
+        // Inject rules database into services before building flow service
+        outcomeSelector.SetRulesDatabase(rulesDatabase);
+        betManager.SetRulesDatabase(rulesDatabase);
 
         flowService = new RouletteGameFlowService(betManager, gameManager, outcomeSelector, statisticsManager);
     }

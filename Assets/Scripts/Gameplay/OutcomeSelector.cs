@@ -4,10 +4,15 @@ public class OutcomeSelector : MonoBehaviour, IOutcomeService
 {
     private RouletteRulesDatabase rulesDb;
     private int selectedNumber = -1;
-    
-    private void Start()
+
+    public void SetRulesDatabase(RouletteRulesDatabase db)
     {
-        rulesDb = RouletteRulesDatabase.Instance;
+        if (db == null)
+        {
+            Debug.LogWarning("[OutcomeSelector] Attempted to set null rules database.", this);
+            return;
+        }
+        rulesDb = db;
     }
     
     public void SetSelectedNumber(int number)
@@ -25,10 +30,9 @@ public class OutcomeSelector : MonoBehaviour, IOutcomeService
     
     public int GetOutcome()
     {
-        EnsureRulesDatabase();
-
         if (rulesDb == null)
         {
+            Debug.LogError("[OutcomeSelector] Rules database not initialized. Call SetRulesDatabase first.", this);
             return 0;
         }
 
@@ -50,13 +54,5 @@ public class OutcomeSelector : MonoBehaviour, IOutcomeService
     public bool HasSelection()
     {
         return selectedNumber >= 0;
-    }
-
-    private void EnsureRulesDatabase()
-    {
-        if (rulesDb == null)
-        {
-            rulesDb = RouletteRulesDatabase.Instance;
-        }
     }
 }

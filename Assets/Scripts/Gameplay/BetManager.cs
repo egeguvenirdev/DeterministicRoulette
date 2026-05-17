@@ -4,8 +4,19 @@ using UnityEngine;
 public class BetManager : MonoBehaviour, IBetService
 {
     private readonly List<BetData> activeBets = new List<BetData>();
+    private RouletteRulesDatabase rulesDatabase;
 
     public IReadOnlyList<BetData> ActiveBets => activeBets;
+
+    public void SetRulesDatabase(RouletteRulesDatabase db)
+    {
+        if (db == null)
+        {
+            Debug.LogWarning("[BetManager] Attempted to set null rules database.", this);
+            return;
+        }
+        rulesDatabase = db;
+    }
 
     public bool TryAddBet(BetData bet)
     {
@@ -14,7 +25,13 @@ public class BetManager : MonoBehaviour, IBetService
             return false;
         }
 
-        if (RouletteRulesDatabase.Instance == null || !RouletteRulesDatabase.Instance.IsValidBet(bet))
+        if (rulesDatabase == null)
+        {
+            Debug.LogError("[BetManager] Rules database not initialized. Call SetRulesDatabase first.", this);
+            return false;
+        }
+
+        if (!rulesDatabase.IsValidBet(bet))
         {
             return false;
         }

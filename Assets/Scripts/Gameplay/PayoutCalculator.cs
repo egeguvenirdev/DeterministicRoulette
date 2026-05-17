@@ -4,18 +4,22 @@ using System.Collections.Generic;
 public class PayoutCalculator : MonoBehaviour, IPayoutService
 {
     private RouletteRulesDatabase rulesDb;
-    
-    private void Start()
+
+    public void SetRulesDatabase(RouletteRulesDatabase db)
     {
-        rulesDb = RouletteRulesDatabase.Instance;
+        if (db == null)
+        {
+            Debug.LogWarning("[PayoutCalculator] Attempted to set null rules database.", this);
+            return;
+        }
+        rulesDb = db;
     }
     
     public int CalculateWinnings(int resultNumber, List<BetData> bets)
     {
-        EnsureRulesDatabase();
-
         if (rulesDb == null)
         {
+            Debug.LogError("[PayoutCalculator] Rules database not initialized. Call SetRulesDatabase first.", this);
             return 0;
         }
 
@@ -36,10 +40,9 @@ public class PayoutCalculator : MonoBehaviour, IPayoutService
     
     public List<BetData> GetWinningBets(int resultNumber, List<BetData> bets)
     {
-        EnsureRulesDatabase();
-
         if (rulesDb == null)
         {
+            Debug.LogError("[PayoutCalculator] Rules database not initialized. Call SetRulesDatabase first.", this);
             return new List<BetData>();
         }
 
@@ -104,14 +107,6 @@ public class PayoutCalculator : MonoBehaviour, IPayoutService
             
             default:
                 return false;
-        }
-    }
-
-    private void EnsureRulesDatabase()
-    {
-        if (rulesDb == null)
-        {
-            rulesDb = RouletteRulesDatabase.Instance;
         }
     }
 }

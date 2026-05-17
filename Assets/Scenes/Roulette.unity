@@ -2691,6 +2691,7 @@ GameObject:
   m_Component:
   - component: {fileID: 780949985}
   - component: {fileID: 780949986}
+  - component: {fileID: 780949987}
   m_Layer: 5
   m_Name: GamePLayUI
   m_TagString: Untagged
@@ -2744,8 +2745,62 @@ MonoBehaviour:
   statsText: {fileID: 9160181369118259315}
   wheelAnimator: {fileID: 750719448}
   waitForWheelAnimation: 1
-  betBoardController: {fileID: 2028901236}
+  betBoardController: {fileID: 780949987}
   gameFacade: {fileID: 2028901237}
+--- !u!114 &780949987
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 780949984}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5a41fb21dc1a8f94dbd3b9409310dd2f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RouletteBetBoardController
+  gameUIController: {fileID: 780949986}
+  boardCanvas: {fileID: 1177861575}
+  chipLayerParent: {fileID: 801210459}
+  chipVisualPrefab: {fileID: 6857391570688449040, guid: aae97c5ed7554314a8e17363a339294a, type: 3}
+  cells:
+  - {fileID: 569301039}
+  - {fileID: 809690994}
+  - {fileID: 703126417}
+  - {fileID: 560433389}
+  - {fileID: 1573442572}
+  - {fileID: 400673354}
+  - {fileID: 268636314}
+  - {fileID: 1475699934}
+  - {fileID: 568162243}
+  - {fileID: 1430935023}
+  - {fileID: 881752039}
+  - {fileID: 1532338561}
+  - {fileID: 1094717056}
+  - {fileID: 498940880}
+  - {fileID: 732516746}
+  - {fileID: 775434635}
+  - {fileID: 1607679923}
+  - {fileID: 1540206064}
+  - {fileID: 1801312553}
+  - {fileID: 1453651935}
+  - {fileID: 423869239}
+  - {fileID: 1814794605}
+  - {fileID: 767688928}
+  - {fileID: 1171345209}
+  - {fileID: 853410015}
+  - {fileID: 963171}
+  - {fileID: 201962547}
+  - {fileID: 173823233}
+  - {fileID: 1579382562}
+  - {fileID: 1202283615}
+  - {fileID: 369232441}
+  - {fileID: 1244906266}
+  - {fileID: 634886290}
+  - {fileID: 785381054}
+  - {fileID: 1611111766}
+  - {fileID: 740844648}
+  - {fileID: 1650253077}
 --- !u!1 &785381052
 GameObject:
   m_ObjectHideFlags: 0
@@ -6349,7 +6404,6 @@ GameObject:
   - component: {fileID: 2028901231}
   - component: {fileID: 2028901230}
   - component: {fileID: 2028901229}
-  - component: {fileID: 2028901236}
   - component: {fileID: 2028901237}
   m_Layer: 0
   m_Name: GameSystems
@@ -6451,60 +6505,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2028901236
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2028901228}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5a41fb21dc1a8f94dbd3b9409310dd2f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::RouletteBetBoardController
-  gameUIController: {fileID: 780949986}
-  boardCanvas: {fileID: 0}
-  chipLayerParent: {fileID: 801210459}
-  chipVisualPrefab: {fileID: 6857391570688449040, guid: aae97c5ed7554314a8e17363a339294a, type: 3}
-  cells:
-  - {fileID: 569301039}
-  - {fileID: 809690994}
-  - {fileID: 703126417}
-  - {fileID: 560433389}
-  - {fileID: 1573442572}
-  - {fileID: 400673354}
-  - {fileID: 268636314}
-  - {fileID: 1475699934}
-  - {fileID: 568162243}
-  - {fileID: 1430935023}
-  - {fileID: 881752039}
-  - {fileID: 1532338561}
-  - {fileID: 1094717056}
-  - {fileID: 498940880}
-  - {fileID: 732516746}
-  - {fileID: 775434635}
-  - {fileID: 1607679923}
-  - {fileID: 1540206064}
-  - {fileID: 1801312553}
-  - {fileID: 1453651935}
-  - {fileID: 423869239}
-  - {fileID: 1814794605}
-  - {fileID: 767688928}
-  - {fileID: 1171345209}
-  - {fileID: 853410015}
-  - {fileID: 963171}
-  - {fileID: 201962547}
-  - {fileID: 173823233}
-  - {fileID: 1579382562}
-  - {fileID: 1202283615}
-  - {fileID: 369232441}
-  - {fileID: 1244906266}
-  - {fileID: 634886290}
-  - {fileID: 785381054}
-  - {fileID: 1611111766}
-  - {fileID: 740844648}
-  - {fileID: 1650253077}
 --- !u!114 &2028901237
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6521,6 +6521,7 @@ MonoBehaviour:
   betManager: {fileID: 2028901230}
   gameManager: {fileID: 2028901234}
   statisticsManager: {fileID: 2028901229}
+  rulesDatabase: {fileID: 2028901233}
 --- !u!114 &27903810836825492
 MonoBehaviour:
   m_ObjectHideFlags: 0

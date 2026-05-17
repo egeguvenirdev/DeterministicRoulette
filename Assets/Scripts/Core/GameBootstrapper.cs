@@ -43,6 +43,10 @@ public class GameBootstrapper : MonoBehaviour
 
     private bool WireDependencies()
     {
+        outcomeSelector.SetRulesDatabase(rulesDatabase);
+        payoutCalculator.SetRulesDatabase(rulesDatabase);
+        betManager.SetRulesDatabase(rulesDatabase);
+
         IOutcomeService outcomeService = outcomeSelector;
         IPayoutService payoutService = payoutCalculator;
         IBetService betService = betManager;

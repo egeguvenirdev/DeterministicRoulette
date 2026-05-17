@@ -3,6 +3,7 @@ using UnityEngine;
 
 public class RouletteGameManager : MonoBehaviour
 {
+    [SerializeField] private RouletteRulesDatabase rulesDatabase;
     [SerializeField] private OutcomeSelector outcomeSelector;
     [SerializeField] private PayoutCalculator payoutCalculator;
     [SerializeField] private BetManager betManager;
@@ -27,6 +28,8 @@ public class RouletteGameManager : MonoBehaviour
         IBetService manager,
         IStatisticsService stats)
     {
+        InjectRulesDatabase(selector, calculator, manager);
+
         configuredOutcomeService = selector;
         configuredPayoutService = calculator;
         configuredBetService = manager;
@@ -86,10 +89,50 @@ public class RouletteGameManager : MonoBehaviour
             return;
         }
 
+        EnsureRulesDatabase();
+        if (rulesDatabase != null)
+        {
+            outcomeSelector.SetRulesDatabase(rulesDatabase);
+            payoutCalculator.SetRulesDatabase(rulesDatabase);
+            betManager.SetRulesDatabase(rulesDatabase);
+        }
+
         configuredOutcomeService = outcomeSelector;
         configuredPayoutService = payoutCalculator;
         configuredBetService = betManager;
         configuredStatisticsService = statisticsManager;
         roundService = new RouletteRoundService(configuredOutcomeService, configuredPayoutService, configuredBetService, configuredStatisticsService);
+    }
+
+    private void InjectRulesDatabase(IOutcomeService selector, IPayoutService calculator, IBetService manager)
+    {
+        EnsureRulesDatabase();
+        if (rulesDatabase == null)
+        {
+            return;
+        }
+
+        if (selector is OutcomeSelector concreteOutcomeSelector)
+        {
+            concreteOutcomeSelector.SetRulesDatabase(rulesDatabase);
+        }
+
+        if (calculator is PayoutCalculator concretePayoutCalculator)
+        {
+            concretePayoutCalculator.SetRulesDatabase(rulesDatabase);
+        }
+
+        if (manager is BetManager concreteBetManager)
+        {
+            concreteBetManager.SetRulesDatabase(rulesDatabase);
+        }
+    }
+
+    private void EnsureRulesDatabase()
+    {
+        if (rulesDatabase == null)
+        {
+            rulesDatabase = RouletteRulesDatabase.Instance;
+        }
     }
 }

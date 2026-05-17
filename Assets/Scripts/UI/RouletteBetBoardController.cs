@@ -120,6 +120,17 @@ public class RouletteBetBoardController : MonoBehaviour
             return;
         }
 
+        if (chipsByCell.ContainsKey(cell) && chipsByCell[cell] != null)
+        {
+            if (!gameUIController.TryRemoveBetForCell(cell))
+            {
+                return;
+            }
+
+            RemoveChipForCell(cell);
+            return;
+        }
+
         if (!gameUIController.TryAddBetForCell(cell))
         {
             return;
@@ -160,6 +171,22 @@ public class RouletteBetBoardController : MonoBehaviour
         PositionChip(chip, cell.ChipAnchor);
         chipsByCell[cell] = chip;
         cell.SetHighlighted(true);
+    }
+
+    private void RemoveChipForCell(RouletteBetCellView cell)
+    {
+        if (cell == null)
+        {
+            return;
+        }
+
+        if (chipsByCell.TryGetValue(cell, out Image chip) && chip != null)
+        {
+            SafeDestroy(chip.gameObject);
+        }
+
+        chipsByCell.Remove(cell);
+        cell.SetHighlighted(false);
     }
 
     private static void SafeDestroy(GameObject target)

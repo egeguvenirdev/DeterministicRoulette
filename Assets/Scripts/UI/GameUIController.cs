@@ -332,6 +332,28 @@ public class GameUIController : MonoBehaviour
         return true;
     }
 
+    public bool TryRemoveBetForCell(RouletteBetCellView cell)
+    {
+        if (cell == null)
+        {
+            return false;
+        }
+
+        if (!initialized || gameFacade == null || !gameFacade.IsReady)
+        {
+            Debug.LogWarning("[GameUIController] UI is not initialized. Check serialized gameplay facade wiring.", this);
+            return false;
+        }
+
+        if (!gameFacade.TryRemoveBet(cell.BetType, cell.Number))
+        {
+            return false;
+        }
+
+        RefreshView();
+        return true;
+    }
+
     private bool TryGetStake(out int stake)
     {
         stake = 0;

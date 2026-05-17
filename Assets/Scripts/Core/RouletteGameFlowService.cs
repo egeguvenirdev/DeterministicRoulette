@@ -49,6 +49,25 @@ public class RouletteGameFlowService
         return betManager.TryAddBet(bet);
     }
 
+    public bool TryRemoveBet(BetType betType, int targetNumber = -1)
+    {
+        for (int i = betManager.ActiveBets.Count - 1; i >= 0; i--)
+        {
+            BetData bet = betManager.ActiveBets[i];
+            if (bet == null)
+            {
+                continue;
+            }
+
+            if (bet.betType == betType && bet.targetNumber == targetNumber)
+            {
+                return betManager.RemoveBet(bet);
+            }
+        }
+
+        return false;
+    }
+
     /// <summary>
     /// Sets the deterministic outcome for the next spin.
     /// </summary>

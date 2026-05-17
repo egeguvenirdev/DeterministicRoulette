@@ -69,6 +69,16 @@ public class GameUiFacade : MonoBehaviour
         return flowService.TryAddBet(betType, stake, targetNumber);
     }
 
+    public bool TryRemoveBet(BetType betType, int targetNumber = -1)
+    {
+        if (!IsReady)
+        {
+            return false;
+        }
+
+        return flowService.TryRemoveBet(betType, targetNumber);
+    }
+
     public void SetOutcomeSelection(int targetNumber)
     {
         if (!IsReady)

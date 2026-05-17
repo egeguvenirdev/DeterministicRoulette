@@ -20,6 +20,7 @@ public class GameUIController : MonoBehaviour
     [SerializeField] private TMP_Text winningNumberText;
     [SerializeField] private TMP_Text winningsAmountText;
     [SerializeField] private TMP_Text statsText;
+    [SerializeField] private TMP_Text tableTypeText;
 
     [Header("Animation Sync")]
     [SerializeField] private RouletteWheelAnimator wheelAnimator;
@@ -296,6 +297,41 @@ public class GameUIController : MonoBehaviour
         return true;
     }
 
+    public bool TryAddBetForCell(RouletteBetCellView cell)
+    {
+        if (cell == null)
+        {
+            return false;
+        }
+
+        if (!initialized || gameFacade == null || !gameFacade.IsReady)
+        {
+            Debug.LogWarning("[GameUIController] UI is not initialized. Check serialized gameplay facade wiring.", this);
+            return false;
+        }
+
+        if (!TryGetStake(out int stake))
+        {
+            Debug.LogWarning("Invalid stake");
+            return false;
+        }
+
+        if (cell.BetType == BetType.Straight && (cell.Number < 0 || cell.Number > 36))
+        {
+            Debug.LogWarning("Target number out of range.");
+            return false;
+        }
+
+        if (!gameFacade.TryAddBet(cell.BetType, stake, cell.Number))
+        {
+            Debug.LogWarning("Bet rejected");
+            return false;
+        }
+
+        RefreshView();
+        return true;
+    }
+
     private bool TryGetStake(out int stake)
     {
         stake = 0;
@@ -472,6 +508,66 @@ public class GameUIController : MonoBehaviour
         if (betBoardController != null && gameFacade != null && gameFacade.GetActiveBetCount() == 0)
         {
             betBoardController.ClearChipVisuals();
+        }
+
+        UpdateTableTypeLabel();
+    }
+
+    private void UpdateTableTypeLabel()
+    {
+        if (tableTypeText == null)
+        {
+            return;
+        }
+
+        if (gameFacade == null)
+        {
+            tableTypeText.text = "Table Type: None";
+            return;
+        }
+
+        List<BetData> activeBets = gameFacade.GetActiveBetSnapshot();
+        if (activeBets == null || activeBets.Count == 0)
+        {
+            tableTypeText.text = "Table Type: None";
+            return;
+        }
+
+        List<string> typeNames = new List<string>();
+        for (int i = 0; i < activeBets.Count; i++)
+        {
+            string typeName = GetBetTypeLabel(activeBets[i].betType);
+            if (!typeNames.Contains(typeName))
+            {
+                typeNames.Add(typeName);
+            }
+        }
+
+        if (typeNames.Count == 1)
+        {
+            tableTypeText.text = "Table Type: " + typeNames[0];
+            return;
+        }
+
+        tableTypeText.text = "Table Type: Multiple Bets";
+    }
+
+    private static string GetBetTypeLabel(BetType betType)
+    {
+        switch (betType)
+        {
+            case BetType.Column1:
+            case BetType.Column2:
+            case BetType.Column3:
+                return "Column";
+
+            case BetType.Dozen1:
+            case BetType.Dozen2:
+            case BetType.Dozen3:
+                return "Dozen";
+
+            default:
+                return betType.ToString();
         }
     }
 

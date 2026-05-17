@@ -120,7 +120,7 @@ public class RouletteBetBoardController : MonoBehaviour
             return;
         }
 
-        if (!gameUIController.TryAddStraightBetForNumber(cell.Number))
+        if (!gameUIController.TryAddBetForCell(cell))
         {
             return;
         }

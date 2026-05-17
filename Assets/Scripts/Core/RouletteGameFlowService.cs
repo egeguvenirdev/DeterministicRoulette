@@ -29,6 +29,11 @@ public class RouletteGameFlowService
     /// </summary>
     public bool TryAddStraightBet(int targetNumber, int stake)
     {
+        return TryAddBet(BetType.Straight, stake, targetNumber);
+    }
+
+    public bool TryAddBet(BetType betType, int stake, int targetNumber = -1)
+    {
         if (stake <= 0)
         {
             return false;
@@ -36,7 +41,7 @@ public class RouletteGameFlowService
 
         BetData bet = new BetData
         {
-            betType = BetType.Straight,
+            betType = betType,
             targetNumber = targetNumber,
             amount = stake
         };
@@ -102,6 +107,11 @@ public class RouletteGameFlowService
     public int GetTotalStake()
     {
         return betManager.GetTotalStake();
+    }
+
+    public List<BetData> GetActiveBetSnapshot()
+    {
+        return betManager.GetBetSnapshot();
     }
 
     /// <summary>

@@ -5,6 +5,7 @@ using UnityEngine.UI;
 public class RouletteBetCellView : MonoBehaviour
 {
     [Header("Cell Data")]
+    [SerializeField] private BetType betType = BetType.Straight;
     [SerializeField] private int number;
 
     [Header("References")]
@@ -19,6 +20,7 @@ public class RouletteBetCellView : MonoBehaviour
 
     public event Action<RouletteBetCellView> Clicked;
 
+    public BetType BetType => betType;
     public int Number => number;
     public Button Button => button;
 

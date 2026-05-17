@@ -59,6 +59,16 @@ public class GameUiFacade : MonoBehaviour
         return flowService.TryAddStraightBet(targetNumber, stake);
     }
 
+    public bool TryAddBet(BetType betType, int stake, int targetNumber = -1)
+    {
+        if (!IsReady)
+        {
+            return false;
+        }
+
+        return flowService.TryAddBet(betType, stake, targetNumber);
+    }
+
     public void SetOutcomeSelection(int targetNumber)
     {
         if (!IsReady)
@@ -107,6 +117,16 @@ public class GameUiFacade : MonoBehaviour
         }
 
         return flowService.GetTotalStake();
+    }
+
+    public List<BetData> GetActiveBetSnapshot()
+    {
+        if (!IsReady)
+        {
+            return new List<BetData>();
+        }
+
+        return flowService.GetActiveBetSnapshot();
     }
 
     public GameStateData GetGameState()

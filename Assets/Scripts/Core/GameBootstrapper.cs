@@ -15,61 +15,19 @@ public class GameBootstrapper : MonoBehaviour
 
     private void Start()
     {
-        ResolveReferences();
-
         if (!HasRequiredReferences())
         {
-            Debug.LogError("[Bootstrapper] Missing required scene references. Initialization aborted.", this);
-            enabled = false;
+            Debug.LogWarning($"[Bootstrapper] Missing references. Bootstrap skipped (manual inspector wiring mode). Missing: {GetMissingReferences()}", this);
             return;
         }
 
         if (!WireDependencies())
         {
-            Debug.LogError("[Bootstrapper] Failed to wire dependencies. Initialization aborted.", this);
-            enabled = false;
+            Debug.LogWarning("[Bootstrapper] Failed to wire dependencies. Bootstrap skipped (manual inspector wiring mode).", this);
             return;
         }
 
         gameUIController.Initialize(outcomeSelector, betManager, gameManager, statisticsManager);
-    }
-
-    private void ResolveReferences()
-    {
-        if (rulesDatabase == null)
-        {
-            rulesDatabase = FindFirstObjectByType<RouletteRulesDatabase>();
-        }
-
-        if (outcomeSelector == null)
-        {
-            outcomeSelector = FindFirstObjectByType<OutcomeSelector>();
-        }
-
-        if (payoutCalculator == null)
-        {
-            payoutCalculator = FindFirstObjectByType<PayoutCalculator>();
-        }
-
-        if (betManager == null)
-        {
-            betManager = FindFirstObjectByType<BetManager>();
-        }
-
-        if (statisticsManager == null)
-        {
-            statisticsManager = FindFirstObjectByType<StatisticsManager>();
-        }
-
-        if (gameManager == null)
-        {
-            gameManager = FindFirstObjectByType<RouletteGameManager>();
-        }
-
-        if (gameUIController == null)
-        {
-            gameUIController = FindFirstObjectByType<GameUIController>();
-        }
     }
 
     private bool HasRequiredReferences()
@@ -97,5 +55,47 @@ public class GameBootstrapper : MonoBehaviour
 
         gameManager.Configure(outcomeService, payoutService, betService, statsService);
         return true;
+    }
+
+    private string GetMissingReferences()
+    {
+        System.Collections.Generic.List<string> missing = new System.Collections.Generic.List<string>();
+
+        if (rulesDatabase == null)
+        {
+            missing.Add(nameof(rulesDatabase));
+        }
+
+        if (outcomeSelector == null)
+        {
+            missing.Add(nameof(outcomeSelector));
+        }
+
+        if (payoutCalculator == null)
+        {
+            missing.Add(nameof(payoutCalculator));
+        }
+
+        if (betManager == null)
+        {
+            missing.Add(nameof(betManager));
+        }
+
+        if (statisticsManager == null)
+        {
+            missing.Add(nameof(statisticsManager));
+        }
+
+        if (gameManager == null)
+        {
+            missing.Add(nameof(gameManager));
+        }
+
+        if (gameUIController == null)
+        {
+            missing.Add(nameof(gameUIController));
+        }
+
+        return string.Join(", ", missing);
     }
 }

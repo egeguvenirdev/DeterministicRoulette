@@ -6,6 +6,7 @@ public class RouletteBetBoardController : MonoBehaviour
 {
     [Header("References")]
     [SerializeField] private GameUIController gameUIController;
+    [SerializeField] private Canvas boardCanvas;
     [SerializeField] private RectTransform chipLayerParent;
     [SerializeField] private GameObject chipVisualPrefab;
     [SerializeField] private RouletteBetCellView[] cells;
@@ -177,7 +178,7 @@ public class RouletteBetBoardController : MonoBehaviour
         DestroyImmediate(target);
     }
 
-    private static void PositionChip(Image chip, RectTransform anchor)
+    private void PositionChip(Image chip, RectTransform anchor)
     {
         if (chip == null || anchor == null)
         {
@@ -191,7 +192,7 @@ public class RouletteBetBoardController : MonoBehaviour
             return;
         }
 
-        Canvas canvas = parentRect.GetComponentInParent<Canvas>();
+        Canvas canvas = boardCanvas;
         Camera cam = null;
         if (canvas != null && canvas.renderMode != RenderMode.ScreenSpaceOverlay)
         {

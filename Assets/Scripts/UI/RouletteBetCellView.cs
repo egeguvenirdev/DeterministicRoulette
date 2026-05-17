@@ -37,21 +37,6 @@ public class RouletteBetCellView : MonoBehaviour
 
     private void Awake()
     {
-        if (button == null)
-        {
-            button = GetComponent<Button>();
-        }
-
-        if (chipAnchor == null)
-        {
-            chipAnchor = transform as RectTransform;
-        }
-
-        if (highlightGraphic == null)
-        {
-            highlightGraphic = GetComponent<Graphic>();
-        }
-
         SetHighlighted(false);
     }
 

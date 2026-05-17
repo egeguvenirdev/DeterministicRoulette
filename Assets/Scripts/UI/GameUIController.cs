@@ -28,10 +28,11 @@ public class GameUIController : MonoBehaviour
     [Header("Bet Board")]
     [SerializeField] private RouletteBetBoardController betBoardController;
 
-    private OutcomeSelector outcomeSelector;
-    private BetManager betManager;
-    private RouletteGameManager gameManager;
-    private StatisticsManager statisticsManager;
+    [Header("Gameplay Dependencies")]
+    [SerializeField] private OutcomeSelector outcomeSelector;
+    [SerializeField] private BetManager betManager;
+    [SerializeField] private RouletteGameManager gameManager;
+    [SerializeField] private StatisticsManager statisticsManager;
     private RouletteGameFlowService flowService;
     private bool initialized;
     private bool roundCompletedBound;
@@ -50,17 +51,27 @@ public class GameUIController : MonoBehaviour
             return;
         }
 
-        ResolveGameplayReferences();
-
         if (HasDependencies())
         {
             Initialize(outcomeSelector, betManager, gameManager, statisticsManager);
+            return;
         }
+
+        Debug.LogError($"[GameUIController] Missing gameplay dependencies in Inspector: {GetMissingGameplayDependencies()}", this);
     }
 
     private void OnEnable()
     {
         WireButtons();
+
+        if (!initialized)
+        {
+            return;
+        }
+
+        BindRoundCompleted();
+        BindWheelAnimator();
+        BindBetBoardController();
     }
 
     public void Initialize(
@@ -118,8 +129,6 @@ public class GameUIController : MonoBehaviour
             return;
         }
 
-        EnsureDropdownBindings(dropdown);
-
         dropdown.ClearOptions();
         dropdown.AddOptions(BuildNumberOptions(includeRandom));
         dropdown.SetValueWithoutNotify(0);
@@ -129,36 +138,6 @@ public class GameUIController : MonoBehaviour
         {
             int selectedIndex = Mathf.Clamp(dropdown.value, 0, dropdown.options.Count - 1);
             dropdown.captionText.text = dropdown.options[selectedIndex].text;
-        }
-    }
-
-    private void EnsureDropdownBindings(TMP_Dropdown dropdown)
-    {
-        if (dropdown.captionText == null)
-        {
-            Transform label = dropdown.transform.Find("Label");
-            if (label != null)
-            {
-                dropdown.captionText = label.GetComponent<TMP_Text>();
-            }
-        }
-
-        if (dropdown.template == null)
-        {
-            Transform template = dropdown.transform.Find("Template");
-            if (template != null)
-            {
-                dropdown.template = template as RectTransform;
-            }
-        }
-
-        if (dropdown.itemText == null)
-        {
-            Transform itemLabel = dropdown.transform.Find("Template/Viewport/Content/Item/Item Label");
-            if (itemLabel != null)
-            {
-                dropdown.itemText = itemLabel.GetComponent<TMP_Text>();
-            }
         }
     }
 
@@ -195,11 +174,7 @@ public class GameUIController : MonoBehaviour
         }
 
         button.onClick.RemoveListener(action);
-
-        if (button.onClick.GetPersistentEventCount() == 0)
-        {
-            button.onClick.AddListener(action);
-        }
+        button.onClick.AddListener(action);
     }
 
 
@@ -308,6 +283,7 @@ public class GameUIController : MonoBehaviour
     {
         if (!initialized || flowService == null)
         {
+            Debug.LogWarning("[GameUIController] UI is not initialized. Check serialized gameplay dependencies and bootstrap wiring.", this);
             return false;
         }
 
@@ -520,37 +496,31 @@ public class GameUIController : MonoBehaviour
                statisticsManager != null;
     }
 
-    private void ResolveGameplayReferences()
+    private string GetMissingGameplayDependencies()
     {
+        List<string> missing = new List<string>();
+
         if (outcomeSelector == null)
         {
-            outcomeSelector = FindFirstObjectByType<OutcomeSelector>();
+            missing.Add(nameof(outcomeSelector));
         }
 
         if (betManager == null)
         {
-            betManager = FindFirstObjectByType<BetManager>();
+            missing.Add(nameof(betManager));
         }
 
         if (gameManager == null)
         {
-            gameManager = FindFirstObjectByType<RouletteGameManager>();
+            missing.Add(nameof(gameManager));
         }
 
         if (statisticsManager == null)
         {
-            statisticsManager = FindFirstObjectByType<StatisticsManager>();
+            missing.Add(nameof(statisticsManager));
         }
 
-        if (wheelAnimator == null)
-        {
-            wheelAnimator = FindFirstObjectByType<RouletteWheelAnimator>();
-        }
-
-        if (betBoardController == null)
-        {
-            betBoardController = FindFirstObjectByType<RouletteBetBoardController>();
-        }
+        return string.Join(", ", missing);
     }
 
     private void BindBetBoardController()

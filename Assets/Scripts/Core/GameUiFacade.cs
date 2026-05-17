@@ -59,24 +59,24 @@ public class GameUiFacade : MonoBehaviour
         return flowService.TryAddStraightBet(targetNumber, stake);
     }
 
-    public bool TryAddBet(BetType betType, int stake, int targetNumber = -1)
+    public bool TryAddBet(BetType betType, int stake, int targetNumber = -1, List<int> targetNumbers = null)
     {
         if (!IsReady)
         {
             return false;
         }
 
-        return flowService.TryAddBet(betType, stake, targetNumber);
+        return flowService.TryAddBet(betType, stake, targetNumber, targetNumbers);
     }
 
-    public bool TryRemoveBet(BetType betType, int targetNumber = -1)
+    public bool TryRemoveBet(BetType betType, int targetNumber = -1, List<int> targetNumbers = null)
     {
         if (!IsReady)
         {
             return false;
         }
 
-        return flowService.TryRemoveBet(betType, targetNumber);
+        return flowService.TryRemoveBet(betType, targetNumber, targetNumbers);
     }
 
     public void SetOutcomeSelection(int targetNumber)

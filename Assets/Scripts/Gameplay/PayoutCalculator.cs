@@ -104,6 +104,12 @@ public class PayoutCalculator : MonoBehaviour, IPayoutService
             
             case BetType.Column3:
                 return resultData.column == 2 && resultNumber != 0;
+
+            case BetType.Split:
+            case BetType.Street:
+            case BetType.Corner:
+            case BetType.SixLine:
+                return bet.targetNumbers != null && bet.targetNumbers.Contains(resultNumber);
             
             default:
                 return false;

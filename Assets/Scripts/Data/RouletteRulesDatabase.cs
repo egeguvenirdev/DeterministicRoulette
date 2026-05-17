@@ -121,6 +121,18 @@ public class RouletteRulesDatabase : MonoBehaviour
             case BetType.Column2:
             case BetType.Column3:
                 return true;
+            case BetType.Split:
+                return bet.targetNumbers != null && bet.targetNumbers.Count == 2
+                    && bet.targetNumbers.TrueForAll(n => n >= 0 && n <= 36);
+            case BetType.Street:
+                return bet.targetNumbers != null && bet.targetNumbers.Count == 3
+                    && bet.targetNumbers.TrueForAll(n => n >= 0 && n <= 36);
+            case BetType.Corner:
+                return bet.targetNumbers != null && bet.targetNumbers.Count == 4
+                    && bet.targetNumbers.TrueForAll(n => n >= 0 && n <= 36);
+            case BetType.SixLine:
+                return bet.targetNumbers != null && bet.targetNumbers.Count == 6
+                    && bet.targetNumbers.TrueForAll(n => n >= 0 && n <= 36);
             default:
                 return false;
         }

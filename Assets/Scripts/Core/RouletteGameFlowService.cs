@@ -32,7 +32,7 @@ public class RouletteGameFlowService
         return TryAddBet(BetType.Straight, stake, targetNumber);
     }
 
-    public bool TryAddBet(BetType betType, int stake, int targetNumber = -1)
+    public bool TryAddBet(BetType betType, int stake, int targetNumber = -1, List<int> targetNumbers = null)
     {
         if (stake <= 0)
         {
@@ -43,13 +43,14 @@ public class RouletteGameFlowService
         {
             betType = betType,
             targetNumber = targetNumber,
-            amount = stake
+            amount = stake,
+            targetNumbers = targetNumbers != null ? new List<int>(targetNumbers) : new List<int>()
         };
 
         return betManager.TryAddBet(bet);
     }
 
-    public bool TryRemoveBet(BetType betType, int targetNumber = -1)
+    public bool TryRemoveBet(BetType betType, int targetNumber = -1, List<int> targetNumbers = null)
     {
         for (int i = betManager.ActiveBets.Count - 1; i >= 0; i--)
         {
@@ -59,7 +60,20 @@ public class RouletteGameFlowService
                 continue;
             }
 
-            if (bet.betType == betType && bet.targetNumber == targetNumber)
+            if (bet.betType != betType)
+            {
+                continue;
+            }
+
+            if (targetNumbers != null && targetNumbers.Count > 0)
+            {
+                if (bet.targetNumbers != null && bet.targetNumbers.Count == targetNumbers.Count
+                    && bet.targetNumbers.TrueForAll(n => targetNumbers.Contains(n)))
+                {
+                    return betManager.RemoveBet(bet);
+                }
+            }
+            else if (bet.targetNumber == targetNumber)
             {
                 return betManager.RemoveBet(bet);
             }

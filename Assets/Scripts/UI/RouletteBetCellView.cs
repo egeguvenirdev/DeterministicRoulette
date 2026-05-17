@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -7,6 +8,7 @@ public class RouletteBetCellView : MonoBehaviour
     [Header("Cell Data")]
     [SerializeField] private BetType betType = BetType.Straight;
     [SerializeField] private int number;
+    [SerializeField] private List<int> targetNumbers = new List<int>();
 
     [Header("References")]
     [SerializeField] private Button button;
@@ -22,6 +24,7 @@ public class RouletteBetCellView : MonoBehaviour
 
     public BetType BetType => betType;
     public int Number => number;
+    public List<int> TargetNumbers => targetNumbers;
     public Button Button => button;
 
     public RectTransform ChipAnchor

@@ -322,7 +322,7 @@ public class GameUIController : MonoBehaviour
             return false;
         }
 
-        if (!gameFacade.TryAddBet(cell.BetType, stake, cell.Number))
+        if (!gameFacade.TryAddBet(cell.BetType, stake, cell.Number, cell.TargetNumbers))
         {
             Debug.LogWarning("Bet rejected");
             return false;
@@ -345,7 +345,7 @@ public class GameUIController : MonoBehaviour
             return false;
         }
 
-        if (!gameFacade.TryRemoveBet(cell.BetType, cell.Number))
+        if (!gameFacade.TryRemoveBet(cell.BetType, cell.Number, cell.TargetNumbers))
         {
             return false;
         }
@@ -401,7 +401,8 @@ public class GameUIController : MonoBehaviour
         bool hasWinningBet = roundResult.winningBets != null && roundResult.winningBets.Count > 0;
         if (winningsAmountText != null && hasWinningBet && roundResult.totalWinnings > 0)
         {
-            winningsAmountText.text = $"<color=#00FF00>+ {roundResult.totalWinnings}</color>";
+            string winningTypes = BuildWinningBetTypesLabel(roundResult.winningBets);
+            winningsAmountText.text = $"<color=#00FF00>+ {roundResult.totalWinnings} ({winningTypes})</color>";
         }
         else if (winningsAmountText != null)
         {
@@ -572,6 +573,20 @@ public class GameUIController : MonoBehaviour
         }
 
         tableTypeText.text = "Table Type: Multiple Bets";
+    }
+
+    private static string BuildWinningBetTypesLabel(List<BetData> winningBets)
+    {
+        List<string> labels = new List<string>();
+        for (int i = 0; i < winningBets.Count; i++)
+        {
+            string label = GetBetTypeLabel(winningBets[i].betType);
+            if (!labels.Contains(label))
+            {
+                labels.Add(label);
+            }
+        }
+        return string.Join(", ", labels);
     }
 
     private static string GetBetTypeLabel(BetType betType)

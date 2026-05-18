@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.Events;
 
 /// <summary>
 /// Popup panel that appears when a number cell is clicked on the bet board.
@@ -19,6 +20,7 @@ public class BetTypePickerPopup : MonoBehaviour
     public event Action<RouletteNeighborCalculator.BetOption> OptionSelected;
 
     private readonly List<Button> optionButtons = new List<Button>();
+    private readonly Dictionary<Button, UnityAction> popupButtonHandlers = new Dictionary<Button, UnityAction>();
 
     private void Awake()
     {
@@ -69,8 +71,7 @@ public class BetTypePickerPopup : MonoBehaviour
                     label.text = option.label;
                 }
 
-                button.onClick.RemoveAllListeners();
-                button.onClick.AddListener(() =>
+                SetPopupButtonHandler(button, () =>
                 {
                     Hide();
                     OptionSelected?.Invoke(option);
@@ -78,7 +79,7 @@ public class BetTypePickerPopup : MonoBehaviour
             }
             else
             {
-                button.onClick.RemoveAllListeners();
+                ClearPopupButtonHandler(button);
                 button.gameObject.SetActive(false);
             }
         }
@@ -120,6 +121,32 @@ public class BetTypePickerPopup : MonoBehaviour
         if (target != null)
         {
             target.SetActive(visible);
+        }
+    }
+
+    private void SetPopupButtonHandler(Button button, UnityAction handler)
+    {
+        if (button == null)
+        {
+            return;
+        }
+
+        ClearPopupButtonHandler(button);
+        button.onClick.AddListener(handler);
+        popupButtonHandlers[button] = handler;
+    }
+
+    private void ClearPopupButtonHandler(Button button)
+    {
+        if (button == null)
+        {
+            return;
+        }
+
+        if (popupButtonHandlers.TryGetValue(button, out UnityAction oldHandler))
+        {
+            button.onClick.RemoveListener(oldHandler);
+            popupButtonHandlers.Remove(button);
         }
     }
 }

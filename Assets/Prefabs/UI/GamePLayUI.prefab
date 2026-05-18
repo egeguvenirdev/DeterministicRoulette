@@ -9165,16 +9165,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7e3bd9b457c71b64295a4a23d4e6c9ac, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameUIController
-  targetNumberDropdown: {fileID: 2625876952603205347}
   spinButton: {fileID: 8417560633610719776}
-  clearSelectionButton: {fileID: 5451065966612506808}
   clearBetsButton: {fileID: 4171921715185623449}
-  wheelAnimator: {fileID: 0}
-  waitForWheelAnimation: 1
   betBoardController: {fileID: 402597172867651790}
   gameFacade: {fileID: 0}
   stakeInputHandler: {fileID: 5935344901035494302}
   roundResultPresenter: {fileID: 5454895005587785771}
+  outcomeSelectionUI: {fileID: 0}
+  spinLifecycleController: {fileID: 0}
 --- !u!114 &402597172867651790
 MonoBehaviour:
   m_ObjectHideFlags: 0

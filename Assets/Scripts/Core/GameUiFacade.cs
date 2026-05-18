@@ -89,6 +89,16 @@ public class GameUiFacade : MonoBehaviour
         flowService.SetOutcomeSelection(targetNumber);
     }
 
+    public void SetOutcomeSelectionPreset(OutcomeSelectionPreset preset)
+    {
+        if (!IsReady)
+        {
+            return;
+        }
+
+        flowService.SetOutcomeSelectionPreset(preset);
+    }
+
     public void ClearOutcomeSelection()
     {
         if (!IsReady)

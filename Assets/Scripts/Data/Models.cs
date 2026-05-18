@@ -39,6 +39,18 @@ public enum NumberColor
     Green
 }
 
+public enum OutcomeSelectionPreset
+{
+    Random,
+    ExactNumber,
+    Red,
+    Black,
+    Even,
+    Odd,
+    Low,
+    High
+}
+
 [System.Serializable]
 public class RouletteNumberData
 {

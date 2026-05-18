@@ -95,6 +95,11 @@ public class RouletteGameFlowService
         outcomeSelector.SetSelectedNumber(targetNumber);
     }
 
+    public void SetOutcomeSelectionPreset(OutcomeSelectionPreset preset)
+    {
+        outcomeSelector.SetSelectionPreset(preset);
+    }
+
     /// <summary>
     /// Clears the deterministic outcome selection (resets to random).
     /// </summary>

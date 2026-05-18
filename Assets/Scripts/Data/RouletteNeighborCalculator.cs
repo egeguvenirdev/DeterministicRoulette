@@ -54,7 +54,7 @@ public static class RouletteNeighborCalculator
         {
             betType = BetType.Street,
             targetNumbers = new List<int> { s1, s2, s3 },
-            label = $"{s1}-{s2}-{s3}"
+            label = $"Street {s1}-{s2}-{s3}"
         });
 
         // Corners: number can be in up to 4 different 2x2 blocks

@@ -7,11 +7,11 @@ using TMPro;
 /// <summary>
 /// Popup panel that appears when a number cell is clicked on the bet board.
 /// Shows valid bet type options (Straight, Split, Street, Corner, SixLine) for that number.
-/// Wire references in Inspector or via the BetTypePickerPopupCreator editor tool.
 /// </summary>
 public class BetTypePickerPopup : MonoBehaviour
 {
     [Header("References")]
+    [SerializeField] private GameObject overlayRoot;
     [SerializeField] private TMP_Text titleText;
     [SerializeField] private Transform optionsContainer;
     [SerializeField] private Button cancelButton;
@@ -23,7 +23,7 @@ public class BetTypePickerPopup : MonoBehaviour
     private void Awake()
     {
         CacheOptionButtons();
-        gameObject.SetActive(false);
+        SetOverlayVisible(false);
 
         if (cancelButton != null)
         {
@@ -58,7 +58,6 @@ public class BetTypePickerPopup : MonoBehaviour
                 continue;
             }
 
-            int capturedIndex = i;
             if (i < optionCount && options[i] != null)
             {
                 RouletteNeighborCalculator.BetOption option = options[i];
@@ -84,12 +83,12 @@ public class BetTypePickerPopup : MonoBehaviour
             }
         }
 
-        gameObject.SetActive(true);
+        SetOverlayVisible(true);
     }
 
     public void Hide()
     {
-        gameObject.SetActive(false);
+        SetOverlayVisible(false);
     }
 
     private void CacheOptionButtons()
@@ -104,9 +103,23 @@ public class BetTypePickerPopup : MonoBehaviour
         {
             Button button = optionsContainer.GetChild(i).GetComponent<Button>();
             if (button != null && !optionButtons.Contains(button))
-        {
+            {
                 optionButtons.Add(button);
             }
+        }
+    }
+
+    private void SetOverlayVisible(bool visible)
+    {
+        GameObject target = overlayRoot;
+        if (target == null && transform.childCount > 0)
+        {
+            target = transform.GetChild(0).gameObject;
+        }
+
+        if (target != null)
+        {
+            target.SetActive(visible);
         }
     }
 }

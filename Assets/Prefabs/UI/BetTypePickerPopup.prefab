@@ -3158,6 +3158,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b65025d30943fc843b7d5e3428fc0cfd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BetTypePickerPopup
+  overlayRoot: {fileID: 6464267594647011989}
   titleText: {fileID: 8535832776243771244}
   optionsContainer: {fileID: 6290022832284800288}
   cancelButton: {fileID: 4473699024706231362}

@@ -9,8 +9,6 @@ public class RouletteRulesDatabase : MonoBehaviour
     private Dictionary<int, RouletteNumberData> numberDatabase = new Dictionary<int, RouletteNumberData>();
     private Dictionary<BetType, float> payoutRates = new Dictionary<BetType, float>();
     
-    public RouletteType currentRouletteType = RouletteType.European;
-    
     private void Awake()
     {
         if (instance == null)
@@ -27,6 +25,7 @@ public class RouletteRulesDatabase : MonoBehaviour
     
     private void InitializeRoulette()
     {
+        // Current scope supports European roulette rules.
         InitializeEuropeanRoulette();
         InitializePayoutRates();
     }

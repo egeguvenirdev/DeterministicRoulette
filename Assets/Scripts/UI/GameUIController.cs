@@ -354,6 +354,67 @@ public class GameUIController : MonoBehaviour
         return true;
     }
 
+    /// <summary>
+    /// Places a bet based on a bet option chosen from the popup (handles Straight through SixLine).
+    /// </summary>
+    public bool TryAddBetFromOption(RouletteNeighborCalculator.BetOption option)
+    {
+        if (option == null || option.targetNumbers == null || option.targetNumbers.Count == 0)
+        {
+            return false;
+        }
+
+        if (!initialized || gameFacade == null || !gameFacade.IsReady)
+        {
+            Debug.LogWarning("[GameUIController] UI is not initialized. Check serialized gameplay facade wiring.", this);
+            return false;
+        }
+
+        if (!TryGetStake(out int stake))
+        {
+            Debug.LogWarning("[GameUIController] Invalid stake.");
+            return false;
+        }
+
+        // For Straight bets use targetNumbers[0] as the specific target; multi-number bets use -1.
+        int targetNumber = option.betType == BetType.Straight ? option.targetNumbers[0] : -1;
+
+        if (!gameFacade.TryAddBet(option.betType, stake, targetNumber, option.targetNumbers))
+        {
+            Debug.LogWarning("[GameUIController] Bet from option rejected.");
+            return false;
+        }
+
+        RefreshView();
+        return true;
+    }
+
+    /// <summary>
+    /// Removes a bet that was placed via a popup option.
+    /// Matches by bet type and targetNumbers list.
+    /// </summary>
+    public bool TryRemoveBetFromOption(RouletteNeighborCalculator.BetOption option)
+    {
+        if (option == null || option.targetNumbers == null || option.targetNumbers.Count == 0)
+        {
+            return false;
+        }
+
+        if (!initialized || gameFacade == null || !gameFacade.IsReady)
+        {
+            Debug.LogWarning("[GameUIController] UI is not initialized. Check serialized gameplay facade wiring.", this);
+            return false;
+        }
+
+        if (!gameFacade.TryRemoveBet(option.betType, -1, option.targetNumbers))
+        {
+            return false;
+        }
+
+        RefreshView();
+        return true;
+    }
+
     private bool TryGetStake(out int stake)
     {
         stake = 0;

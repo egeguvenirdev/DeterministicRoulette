@@ -11,17 +11,30 @@ public class RouletteBetBoardController : MonoBehaviour
     [SerializeField] private GameObject chipVisualPrefab;
     [SerializeField] private RouletteBetCellView[] cells;
 
+    [Header("Popup")]
+    [SerializeField] private BetTypePickerPopup betTypePickerPopup;
+
     private readonly Dictionary<RouletteBetCellView, Image> chipsByCell = new Dictionary<RouletteBetCellView, Image>();
+    // Maps every chip-covered cell to the cell that was originally clicked to place that bet.
+    private readonly Dictionary<RouletteBetCellView, RouletteBetCellView> originCellByCell = new Dictionary<RouletteBetCellView, RouletteBetCellView>();
+    // Maps each origin cell to the bet option that was chosen (for removal).
+    private readonly Dictionary<RouletteBetCellView, RouletteNeighborCalculator.BetOption> optionByOriginCell = new Dictionary<RouletteBetCellView, RouletteNeighborCalculator.BetOption>();
+    // The number cell that is waiting for the popup selection.
+    private RouletteBetCellView pendingOriginCell;
     private bool isBoardInteractable = true;
 
     private void OnEnable()
     {
         BindCells();
+        if (betTypePickerPopup != null)
+            betTypePickerPopup.OptionSelected += OnBetOptionSelected;
     }
 
     private void OnDisable()
     {
         UnbindCells();
+        if (betTypePickerPopup != null)
+            betTypePickerPopup.OptionSelected -= OnBetOptionSelected;
     }
 
     public void Initialize(GameUIController controller)
@@ -66,6 +79,9 @@ public class RouletteBetBoardController : MonoBehaviour
         }
 
         chipsByCell.Clear();
+        originCellByCell.Clear();
+        optionByOriginCell.Clear();
+        pendingOriginCell = null;
     }
 
     private void BindCells()
@@ -120,23 +136,30 @@ public class RouletteBetBoardController : MonoBehaviour
             return;
         }
 
-        if (chipsByCell.ContainsKey(cell) && chipsByCell[cell] != null)
+        // Check if this cell (or any cell it belongs to) is covered by an existing bet
+        RouletteBetCellView origin = GetOriginCell(cell);
+        if (origin != null)
         {
-            if (!gameUIController.TryRemoveBetForCell(cell))
-            {
-                return;
-            }
-
-            RemoveChipForCell(cell);
+            RemoveBetAndChips(origin);
             return;
         }
 
+        // For number cells (Straight), show popup to let the player choose bet type
+        if (cell.BetType == BetType.Straight && betTypePickerPopup != null)
+        {
+            pendingOriginCell = cell;
+            betTypePickerPopup.Show(cell.Number);
+            return;
+        }
+
+        // Outside bets (Red, Black, Dozen, Column, etc.) are placed directly
         if (!gameUIController.TryAddBetForCell(cell))
         {
             return;
         }
 
         EnsureChipForCell(cell);
+        originCellByCell[cell] = cell;  // self-origin so removal works uniformly
     }
 
     private void EnsureChipForCell(RouletteBetCellView cell)
@@ -188,6 +211,111 @@ public class RouletteBetBoardController : MonoBehaviour
         chipsByCell.Remove(cell);
         cell.SetHighlighted(false);
     }
+
+    // ── Popup integration ────────────────────────────────────────────────────
+
+    private void OnBetOptionSelected(RouletteNeighborCalculator.BetOption option)
+    {
+        if (pendingOriginCell == null)
+        {
+            return;
+        }
+
+        RouletteBetCellView origin = pendingOriginCell;
+        pendingOriginCell = null;
+        HandleOptionSelected(origin, option);
+    }
+
+    private void HandleOptionSelected(RouletteBetCellView originCell, RouletteNeighborCalculator.BetOption option)
+    {
+        if (!gameUIController.TryAddBetFromOption(option))
+        {
+            return;
+        }
+
+        // Place chips on every number cell covered by this bet
+        foreach (int number in option.targetNumbers)
+        {
+            RouletteBetCellView coveredCell = FindNumberCell(number);
+            if (coveredCell == null)
+            {
+                continue;
+            }
+
+            EnsureChipForCell(coveredCell);
+            originCellByCell[coveredCell] = originCell;
+        }
+
+        optionByOriginCell[originCell] = option;
+    }
+
+    /// <summary>Returns the origin cell for the given cell if a bet chip exists on it, otherwise null.</summary>
+    private RouletteBetCellView GetOriginCell(RouletteBetCellView cell)
+    {
+        if (originCellByCell.TryGetValue(cell, out RouletteBetCellView origin))
+        {
+            return origin;
+        }
+
+        // Fallback for directly placed chips (outside bets added before tracking was wired)
+        if (chipsByCell.ContainsKey(cell) && chipsByCell[cell] != null)
+        {
+            return cell;
+        }
+
+        return null;
+    }
+
+    private void RemoveBetAndChips(RouletteBetCellView origin)
+    {
+        // Remove the bet from the game model
+        if (optionByOriginCell.TryGetValue(origin, out RouletteNeighborCalculator.BetOption option))
+        {
+            gameUIController.TryRemoveBetFromOption(option);
+        }
+        else
+        {
+            gameUIController.TryRemoveBetForCell(origin);
+        }
+
+        // Remove chip visuals from all cells covered by this origin
+        var covered = new List<RouletteBetCellView>();
+        foreach (KeyValuePair<RouletteBetCellView, RouletteBetCellView> kvp in originCellByCell)
+        {
+            if (kvp.Value == origin)
+            {
+                covered.Add(kvp.Key);
+            }
+        }
+
+        foreach (RouletteBetCellView c in covered)
+        {
+            RemoveChipForCell(c);
+            originCellByCell.Remove(c);
+        }
+
+        optionByOriginCell.Remove(origin);
+    }
+
+    private RouletteBetCellView FindNumberCell(int number)
+    {
+        if (cells == null)
+        {
+            return null;
+        }
+
+        foreach (RouletteBetCellView cell in cells)
+        {
+            if (cell != null && cell.BetType == BetType.Straight && cell.Number == number)
+            {
+                return cell;
+            }
+        }
+
+        return null;
+    }
+
+    // ── Private helpers ──────────────────────────────────────────────────────
 
     private static void SafeDestroy(GameObject target)
     {

@@ -9122,6 +9122,8 @@ GameObject:
   - component: {fileID: 288564160188971704}
   - component: {fileID: 374784865786565846}
   - component: {fileID: 402597172867651790}
+  - component: {fileID: 5935344901035494302}
+  - component: {fileID: 5454895005587785771}
   m_Layer: 5
   m_Name: GamePLayUI
   m_TagString: Untagged
@@ -9164,21 +9166,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameUIController
   targetNumberDropdown: {fileID: 2625876952603205347}
-  chipValueInput: {fileID: 1116949210427296708}
-  stakeCountInput: {fileID: 7350465262772027075}
   spinButton: {fileID: 8417560633610719776}
   clearSelectionButton: {fileID: 5451065966612506808}
   clearBetsButton: {fileID: 4171921715185623449}
-  chipsText: {fileID: 8381646551949118913}
-  betsText: {fileID: 4823385400783627222}
-  winningNumberText: {fileID: 7998319738194608491}
-  winningsAmountText: {fileID: 2646521562272888781}
-  statsText: {fileID: 1195140610708056111}
-  tableTypeText: {fileID: 3633153624955494379}
   wheelAnimator: {fileID: 0}
   waitForWheelAnimation: 1
   betBoardController: {fileID: 402597172867651790}
   gameFacade: {fileID: 0}
+  stakeInputHandler: {fileID: 5935344901035494302}
+  roundResultPresenter: {fileID: 5454895005587785771}
 --- !u!114 &402597172867651790
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9246,6 +9242,38 @@ MonoBehaviour:
   - {fileID: 8495457112230826157}
   - {fileID: 6660801550951615256}
   betTypePickerPopup: {fileID: 0}
+--- !u!114 &5935344901035494302
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5322505618253149429}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1194ff6146f19d74298d3a71dc40e2bf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::StakeInputHandler
+  chipValueInput: {fileID: 1116949210427296708}
+  stakeCountInput: {fileID: 7350465262772027075}
+--- !u!114 &5454895005587785771
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5322505618253149429}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 87ef015acda331f4bba09cc73fa41814, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RoundResultPresenter
+  winningNumberText: {fileID: 3218162382341945955}
+  winningsAmountText: {fileID: 2911407720422715214}
+  chipsText: {fileID: 8381646551949118913}
+  betsText: {fileID: 4823385400783627222}
+  statsText: {fileID: 1195140610708056111}
+  tableTypeText: {fileID: 2911407720422715214}
 --- !u!1 &5477969994806025719
 GameObject:
   m_ObjectHideFlags: 0

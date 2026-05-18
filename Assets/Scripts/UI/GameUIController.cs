@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -9,20 +8,9 @@ public class GameUIController : MonoBehaviour
 {
     [Header("Controls")]
     [SerializeField] private TMP_Dropdown targetNumberDropdown;
-    // Used as chip value input (legacy field name kept to preserve existing Inspector binding).
-    [SerializeField] private TMP_InputField chipValueInput;
-    [SerializeField] private TMP_InputField stakeCountInput;
     [SerializeField] private Button spinButton;
     [SerializeField] private Button clearSelectionButton;
     [SerializeField] private Button clearBetsButton;
-
-    [Header("Labels")]
-    [SerializeField] private TMP_Text chipsText;
-    [SerializeField] private TMP_Text betsText;
-    [SerializeField] private TMP_Text winningNumberText;
-    [SerializeField] private TMP_Text winningsAmountText;
-    [SerializeField] private TMP_Text statsText;
-    [SerializeField] private TMP_Text tableTypeText;
 
     [Header("Animation Sync")]
     [SerializeField] private RouletteWheelAnimator wheelAnimator;
@@ -34,6 +22,10 @@ public class GameUIController : MonoBehaviour
     [Header("Gameplay Facade")]
     [SerializeField] private GameUiFacade gameFacade;
 
+    [Header("Sub-controllers")]
+    [SerializeField] private StakeInputHandler stakeInputHandler;
+    [SerializeField] private RoundResultPresenter roundResultPresenter;
+
     private bool initialized;
     private bool roundCompletedBound;
     private bool wheelAnimatorBound;
@@ -42,7 +34,6 @@ public class GameUIController : MonoBehaviour
     private void Awake()
     {
         SetupDropdowns();
-        NormalizeStakeInputs();
     }
 
     private void Start()
@@ -53,8 +44,6 @@ public class GameUIController : MonoBehaviour
     private void OnEnable()
     {
         WireButtons();
-        WireStakeInputs();
-        NormalizeStakeInputs();
 
         if (!initialized)
         {
@@ -106,8 +95,6 @@ public class GameUIController : MonoBehaviour
 
         UnbindWheelAnimator();
         UnbindBetBoardController();
-
-        UnwireStakeInputs();
         UnwireButtons();
     }
 
@@ -170,64 +157,6 @@ public class GameUIController : MonoBehaviour
         button.onClick.RemoveListener(action);
         button.onClick.AddListener(action);
     }
-
-    private void WireStakeInputs()
-    {
-        if (chipValueInput != null)
-        {
-            chipValueInput.onEndEdit.RemoveListener(HandleChipValueEndEdit);
-            chipValueInput.onEndEdit.AddListener(HandleChipValueEndEdit);
-        }
-
-        if (stakeCountInput != null)
-        {
-            stakeCountInput.onEndEdit.RemoveListener(HandleStakeCountEndEdit);
-            stakeCountInput.onEndEdit.AddListener(HandleStakeCountEndEdit);
-        }
-    }
-
-    private void UnwireStakeInputs()
-    {
-        if (chipValueInput != null)
-        {
-            chipValueInput.onEndEdit.RemoveListener(HandleChipValueEndEdit);
-        }
-
-        if (stakeCountInput != null)
-        {
-            stakeCountInput.onEndEdit.RemoveListener(HandleStakeCountEndEdit);
-        }
-    }
-
-    private void HandleChipValueEndEdit(string _)
-    {
-        NormalizeInputField(chipValueInput);
-    }
-
-    private void HandleStakeCountEndEdit(string _)
-    {
-        NormalizeInputField(stakeCountInput);
-    }
-
-    private void NormalizeStakeInputs()
-    {
-        NormalizeInputField(chipValueInput);
-        NormalizeInputField(stakeCountInput);
-    }
-
-    private static void NormalizeInputField(TMP_InputField input)
-    {
-        if (input == null)
-        {
-            return;
-        }
-
-        if (!int.TryParse(input.text, out int value) || value <= 0)
-        {
-            input.text = "1";
-        }
-    }
-
 
     private List<TMP_Dropdown.OptionData> BuildNumberOptions(bool includeRandom)
     {
@@ -480,41 +409,13 @@ public class GameUIController : MonoBehaviour
 
     private bool TryGetStake(out int stake)
     {
+        if (stakeInputHandler != null)
+        {
+            return stakeInputHandler.TryGetStake(out stake);
+        }
+
         stake = 0;
-
-        if (chipValueInput == null)
-        {
-            return false;
-        }
-
-        // If count input is not assigned yet, default to 1.
-        int chipValue = ParsePositiveOrDefault(chipValueInput, 1);
-        int stakeCount = ParsePositiveOrDefault(stakeCountInput, 1);
-
-        long totalStake = (long)chipValue * stakeCount;
-        if (totalStake <= 0 || totalStake > int.MaxValue)
-        {
-            return false;
-        }
-
-        stake = (int)totalStake;
-        return true;
-    }
-
-    private static int ParsePositiveOrDefault(TMP_InputField input, int fallback)
-    {
-        if (input == null)
-        {
-            return fallback;
-        }
-
-        if (!int.TryParse(input.text, out int value) || value <= 0)
-        {
-            input.text = fallback.ToString();
-            return fallback;
-        }
-
-        return value;
+        return false;
     }
 
     private void HandleRoundCompleted(RoundResultData roundResult)
@@ -536,29 +437,7 @@ public class GameUIController : MonoBehaviour
 
     private void ApplyRoundResultToView(RoundResultData roundResult)
     {
-        if (roundResult == null)
-        {
-            return;
-        }
-
-        // Winning number with red/black color
-        string numberColor = IsRedNumber(roundResult.resultNumber) ? "#FF0000" : "#000000";
-        if (winningNumberText != null)
-        {
-            winningNumberText.text = $"<color={numberColor}>{roundResult.resultNumber}</color>";
-        }
-        
-        // Winnings/Loss amount with green/red color
-        bool hasWinningBet = roundResult.winningBets != null && roundResult.winningBets.Count > 0;
-        if (winningsAmountText != null && hasWinningBet && roundResult.totalWinnings > 0)
-        {
-            string winningTypes = BuildWinningBetTypesLabel(roundResult.winningBets);
-            winningsAmountText.text = $"<color=#00FF00>+ {roundResult.totalWinnings} ({winningTypes})</color>";
-        }
-        else if (winningsAmountText != null)
-        {
-            winningsAmountText.text = $"<color=#FF0000>- {roundResult.totalLosses}</color>";
-        }
+        roundResultPresenter?.PresentRoundResult(roundResult);
     }
 
     private void BindWheelAnimator()
@@ -619,16 +498,6 @@ public class GameUIController : MonoBehaviour
             targetNumberDropdown.interactable = interactable;
         }
 
-        if (chipValueInput != null)
-        {
-            chipValueInput.interactable = interactable;
-        }
-
-        if (stakeCountInput != null)
-        {
-            stakeCountInput.interactable = interactable;
-        }
-
         if (spinButton != null)
         {
             spinButton.interactable = interactable;
@@ -644,124 +513,33 @@ public class GameUIController : MonoBehaviour
             clearBetsButton.interactable = interactable;
         }
 
+        stakeInputHandler?.SetInteractable(interactable);
 
         if (betBoardController != null)
         {
             betBoardController.SetBoardInteractable(interactable);
         }
     }
-    
-    private bool IsRedNumber(int number)
-    {
-        int[] redNumbers = { 1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36 };
-        return System.Array.Exists(redNumbers, element => element == number);
-    }
 
     private void RefreshView()
     {
-        if (gameFacade != null)
+        if (gameFacade == null)
         {
-            GameStateData state = gameFacade.GetGameState();
-
-            if (state == null)
-            {
-                return;
-            }
-
-            if (chipsText != null)
-            {
-                chipsText.text = "Chips: " + state.totalChips;
-            }
-
-            if (statsText != null)
-            {
-                statsText.text = "Spins: " + state.spinsPlayed + "  W: " + state.totalWins + "  L: " + state.totalLosses;
-            }
+            return;
         }
 
-        if (betsText != null && gameFacade != null)
-        {
-            betsText.text = "Bets: " + gameFacade.GetActiveBetCount() + "  Stake: " + gameFacade.GetTotalStake();
-        }
+        GameStateData state = gameFacade.GetGameState();
+        roundResultPresenter?.PresentGameState(state);
 
-        if (betBoardController != null && gameFacade != null && gameFacade.GetActiveBetCount() == 0)
+        int betCount = gameFacade.GetActiveBetCount();
+        roundResultPresenter?.PresentBets(betCount, gameFacade.GetTotalStake());
+
+        if (betBoardController != null && betCount == 0)
         {
             betBoardController.ClearChipVisuals();
         }
 
-        UpdateTableTypeLabel();
-    }
-
-    private void UpdateTableTypeLabel()
-    {
-        if (tableTypeText == null)
-        {
-            return;
-        }
-
-        if (gameFacade == null)
-        {
-            tableTypeText.text = "Table Type: None";
-            return;
-        }
-
-        List<BetData> activeBets = gameFacade.GetActiveBetSnapshot();
-        if (activeBets == null || activeBets.Count == 0)
-        {
-            tableTypeText.text = "Table Type: None";
-            return;
-        }
-
-        List<string> typeNames = new List<string>();
-        for (int i = 0; i < activeBets.Count; i++)
-        {
-            string typeName = GetBetTypeLabel(activeBets[i].betType);
-            if (!typeNames.Contains(typeName))
-            {
-                typeNames.Add(typeName);
-            }
-        }
-
-        if (typeNames.Count == 1)
-        {
-            tableTypeText.text = "Table Type: " + typeNames[0];
-            return;
-        }
-
-        tableTypeText.text = "Table Type: Multiple Bets";
-    }
-
-    private static string BuildWinningBetTypesLabel(List<BetData> winningBets)
-    {
-        List<string> labels = new List<string>();
-        for (int i = 0; i < winningBets.Count; i++)
-        {
-            string label = GetBetTypeLabel(winningBets[i].betType);
-            if (!labels.Contains(label))
-            {
-                labels.Add(label);
-            }
-        }
-        return string.Join(", ", labels);
-    }
-
-    private static string GetBetTypeLabel(BetType betType)
-    {
-        switch (betType)
-        {
-            case BetType.Column1:
-            case BetType.Column2:
-            case BetType.Column3:
-                return "Column";
-
-            case BetType.Dozen1:
-            case BetType.Dozen2:
-            case BetType.Dozen3:
-                return "Dozen";
-
-            default:
-                return betType.ToString();
-        }
+        roundResultPresenter?.UpdateTableTypeLabel(gameFacade.GetActiveBetSnapshot());
     }
 
     private bool HasDependencies()

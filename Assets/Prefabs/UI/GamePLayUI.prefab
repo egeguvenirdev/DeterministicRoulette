@@ -568,7 +568,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 69ce86d22e46b9349b35a63102d3dcb3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RouletteBetCellView
-  betType: 0
+  betType: 13
   number: 7
   targetNumbers: 
   button: {fileID: 6585690688531253649}

@@ -32,16 +32,6 @@ public class UIDropdownPointerSfxForwarder : MonoBehaviour, IPointerClickHandler
             return;
         }
 
-        AudioClip overrideClip = null;
-        float volumeScale = 1f;
-
-        UIAudioOverride clipOverride = GetComponent<UIAudioOverride>();
-        if (clipOverride != null)
-        {
-            clipOverride.TryGetClip(pointerEventType, out overrideClip);
-            volumeScale = clipOverride.VolumeScale;
-        }
-
-        audioPlayer.Play(pointerEventType, overrideClip, volumeScale);
+        audioPlayer.Play(pointerEventType);
     }
 }

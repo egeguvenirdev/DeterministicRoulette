@@ -80,6 +80,10 @@ public class RouletteWheelAnimator : MonoBehaviour
     [SerializeField] private float whiteRingAngleJitter = 4.5f;
     [SerializeField] private float whiteRingHeightLift = 0.008f;
 
+    [Header("Audio")]
+    [SerializeField] private GameAudioService gameAudioService;
+    [SerializeField] private GameAudioEventId spinStartAudioEvent = GameAudioEventId.SpinStart;
+
     public event Action SpinAnimationStarted;
     public event Action<RoundResultData> SpinAnimationCompleted;
 
@@ -259,6 +263,7 @@ public class RouletteWheelAnimator : MonoBehaviour
         RecalculateDurations();
         IsAnimating = true;
         SpinAnimationStarted?.Invoke();
+        TriggerSpinStartAudio();
 
         float wheelSign = wheelDirection > 0 ? 1f : -1f;
         float ballSign = ballDirection > 0 ? 1f : -1f;
@@ -525,5 +530,15 @@ public class RouletteWheelAnimator : MonoBehaviour
         }
 
         return -1;
+    }
+
+    private void TriggerSpinStartAudio()
+    {
+        if (gameAudioService == null || spinStartAudioEvent == GameAudioEventId.None)
+        {
+            return;
+        }
+
+        gameAudioService.Play(spinStartAudioEvent);
     }
 }

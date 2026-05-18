@@ -226,23 +226,13 @@ public class UIAudioBinder : MonoBehaviour
         }
     }
 
-    private void Play(Component component, UIAudioEventType eventType)
+    private void Play(Component _, UIAudioEventType eventType)
     {
         if (audioPlayer == null)
         {
             return;
         }
 
-        AudioClip overrideClip = null;
-        float volumeScale = 1f;
-
-        UIAudioOverride clipOverride = component != null ? component.GetComponent<UIAudioOverride>() : null;
-        if (clipOverride != null)
-        {
-            clipOverride.TryGetClip(eventType, out overrideClip);
-            volumeScale = clipOverride.VolumeScale;
-        }
-
-        audioPlayer.Play(eventType, overrideClip, volumeScale);
+        audioPlayer.Play(eventType);
     }
 }

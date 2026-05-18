@@ -681,7 +681,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7702025382057587974, guid: c310b40b9291f664b9e05be23f54e1b8, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 0
+      value: 125.77173
       objectReference: {fileID: 0}
     - target: {fileID: 7702025382057587974, guid: c310b40b9291f664b9e05be23f54e1b8, type: 3}
       propertyPath: m_AnchoredPosition.y
@@ -1314,7 +1314,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 24ee7c09aedf21c4e95a7554b8804d16, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RouletteGameManager
-  rulesDatabase: {fileID: 0}
+  rulesDatabase: {fileID: 2028901233}
   outcomeSelector: {fileID: 2028901232}
   payoutCalculator: {fileID: 2028901231}
   betManager: {fileID: 2028901230}
@@ -1548,6 +1548,14 @@ PrefabInstance:
       propertyPath: wheelAnimator
       value: 
       objectReference: {fileID: 750719448}
+    - target: {fileID: 374784865786565846, guid: 14443e59e760f15479d568eca8af6e69, type: 3}
+      propertyPath: outcomeSelectionUI
+      value: 
+      objectReference: {fileID: 7630203280259954234}
+    - target: {fileID: 374784865786565846, guid: 14443e59e760f15479d568eca8af6e69, type: 3}
+      propertyPath: spinLifecycleController
+      value: 
+      objectReference: {fileID: 7630203280259954233}
     - target: {fileID: 402597172867651790, guid: 14443e59e760f15479d568eca8af6e69, type: 3}
       propertyPath: boardCanvas
       value: 
@@ -3027,8 +3035,71 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 5322505618253149429, guid: 14443e59e760f15479d568eca8af6e69, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7630203280259954234}
+    - targetCorrespondingSourceObject: {fileID: 5322505618253149429, guid: 14443e59e760f15479d568eca8af6e69, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7630203280259954233}
   m_SourcePrefab: {fileID: 100100000, guid: 14443e59e760f15479d568eca8af6e69, type: 3}
+--- !u!114 &7630203280259954230 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2625876952603205347, guid: 14443e59e760f15479d568eca8af6e69, type: 3}
+  m_PrefabInstance: {fileID: 7630203280259954229}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7b743370ac3e4ec2a1668f5455a8ef8a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TMP_Dropdown
+--- !u!1 &7630203280259954231 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5322505618253149429, guid: 14443e59e760f15479d568eca8af6e69, type: 3}
+  m_PrefabInstance: {fileID: 7630203280259954229}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &7630203280259954232 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5454895005587785771, guid: 14443e59e760f15479d568eca8af6e69, type: 3}
+  m_PrefabInstance: {fileID: 7630203280259954229}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7630203280259954231}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 87ef015acda331f4bba09cc73fa41814, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RoundResultPresenter
+--- !u!114 &7630203280259954233
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7630203280259954231}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 07cc8cd5b1e3c5043b8de1dfc63fb1ac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SpinLifecycleController
+  wheelAnimator: {fileID: 750719448}
+  waitForWheelAnimation: 1
+  gameFacade: {fileID: 2028901237}
+  roundResultPresenter: {fileID: 7630203280259954232}
+--- !u!114 &7630203280259954234
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7630203280259954231}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1a5078779a132b841b193e66755b8bda, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::OutcomeSelectionUI
+  targetNumberDropdown: {fileID: 7630203280259954230}
+  gameFacade: {fileID: 2028901237}
 --- !u!1001 &9096327056368223254
 PrefabInstance:
   m_ObjectHideFlags: 0

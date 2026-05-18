@@ -7,14 +7,8 @@ using UnityEngine.Events;
 public class GameUIController : MonoBehaviour
 {
     [Header("Controls")]
-    [SerializeField] private TMP_Dropdown targetNumberDropdown;
     [SerializeField] private Button spinButton;
-    [SerializeField] private Button clearSelectionButton;
     [SerializeField] private Button clearBetsButton;
-
-    [Header("Animation Sync")]
-    [SerializeField] private RouletteWheelAnimator wheelAnimator;
-    [SerializeField] private bool waitForWheelAnimation = true;
 
     [Header("Bet Board")]
     [SerializeField] private RouletteBetBoardController betBoardController;
@@ -25,15 +19,15 @@ public class GameUIController : MonoBehaviour
     [Header("Sub-controllers")]
     [SerializeField] private StakeInputHandler stakeInputHandler;
     [SerializeField] private RoundResultPresenter roundResultPresenter;
+    [SerializeField] private OutcomeSelectionUI outcomeSelectionUI;
+    [SerializeField] private SpinLifecycleController spinLifecycleController;
 
     private bool initialized;
     private bool roundCompletedBound;
-    private bool wheelAnimatorBound;
-    private RoundResultData pendingRoundResult;
 
     private void Awake()
     {
-        SetupDropdowns();
+        // Component initialization happens in child components
     }
 
     private void Start()
@@ -51,7 +45,7 @@ public class GameUIController : MonoBehaviour
         }
 
         BindRoundCompleted();
-        BindWheelAnimator();
+        spinLifecycleController?.OnEnable();
         BindBetBoardController();
     }
 
@@ -78,8 +72,19 @@ public class GameUIController : MonoBehaviour
 
         WireButtons();
         BindRoundCompleted();
-        BindWheelAnimator();
+        spinLifecycleController?.OnEnable();
         BindBetBoardController();
+
+        if (outcomeSelectionUI != null)
+        {
+            outcomeSelectionUI.Initialize(gameFacade);
+        }
+
+        if (spinLifecycleController != null)
+        {
+            spinLifecycleController.Initialize(gameFacade, roundResultPresenter);
+            spinLifecycleController.ControlsInteractableRequested += SetControlsInteractable;
+        }
 
         initialized = true;
         RefreshView();
@@ -93,39 +98,21 @@ public class GameUIController : MonoBehaviour
             roundCompletedBound = false;
         }
 
-        UnbindWheelAnimator();
+        if (spinLifecycleController != null)
+        {
+            spinLifecycleController.ControlsInteractableRequested -= SetControlsInteractable;
+            spinLifecycleController.OnDisable();
+        }
+
         UnbindBetBoardController();
         UnwireButtons();
     }
 
-    private void SetupDropdowns()
-    {
-        SetupDropdown(targetNumberDropdown, true);
-    }
 
-    private void SetupDropdown(TMP_Dropdown dropdown, bool includeRandom)
-    {
-        if (dropdown == null)
-        {
-            return;
-        }
-
-        dropdown.ClearOptions();
-        dropdown.AddOptions(BuildNumberOptions(includeRandom));
-        dropdown.SetValueWithoutNotify(0);
-        dropdown.RefreshShownValue();
-
-        if (dropdown.captionText != null && dropdown.options.Count > 0)
-        {
-            int selectedIndex = Mathf.Clamp(dropdown.value, 0, dropdown.options.Count - 1);
-            dropdown.captionText.text = dropdown.options[selectedIndex].text;
-        }
-    }
 
     private void WireButtons()
     {
         BindButton(spinButton, Spin);
-        BindButton(clearSelectionButton, ClearSelection);
         BindButton(clearBetsButton, ClearBets);
     }
 
@@ -134,11 +121,6 @@ public class GameUIController : MonoBehaviour
         if (spinButton != null)
         {
             spinButton.onClick.RemoveListener(Spin);
-        }
-
-        if (clearSelectionButton != null)
-        {
-            clearSelectionButton.onClick.RemoveListener(ClearSelection);
         }
 
         if (clearBetsButton != null)
@@ -158,22 +140,7 @@ public class GameUIController : MonoBehaviour
         button.onClick.AddListener(action);
     }
 
-    private List<TMP_Dropdown.OptionData> BuildNumberOptions(bool includeRandom)
-    {
-        List<TMP_Dropdown.OptionData> options = new List<TMP_Dropdown.OptionData>();
 
-        if (includeRandom)
-        {
-            options.Add(new TMP_Dropdown.OptionData("Random"));
-        }
-
-        for (int number = 0; number <= 36; number++)
-        {
-            options.Add(new TMP_Dropdown.OptionData(number.ToString()));
-        }
-
-        return options;
-    }
 
     private void Spin()
     {
@@ -182,66 +149,8 @@ public class GameUIController : MonoBehaviour
             return;
         }
 
-        ApplySelection();
-
-        if (ShouldWaitForWheelAnimation())
-        {
-            SetControlsInteractable(false);
-        }
-
-        if (!gameFacade.CanSpin())
-        {
-            Debug.LogWarning("Cannot spin");
-            RefreshView();
-            SetControlsInteractable(true);
-            return;
-        }
-
-        RoundResultData roundResult = gameFacade.ExecuteSpin();
-
-        if (roundResult == null)
-        {
-            Debug.LogWarning("Spin failed");
-            SetControlsInteractable(true);
-            return;
-        }
-
-        if (!ShouldWaitForWheelAnimation())
-        {
-            RefreshView();
-        }
-    }
-
-    private void ApplySelection()
-    {
-        if (targetNumberDropdown == null || gameFacade == null)
-        {
-            return;
-        }
-
-        if (targetNumberDropdown.value == 0)
-        {
-            gameFacade.ClearOutcomeSelection();
-            return;
-        }
-
-        gameFacade.SetOutcomeSelection(targetNumberDropdown.value - 1);
-    }
-
-    private void ClearSelection()
-    {
-        if (gameFacade != null)
-        {
-            gameFacade.ClearOutcomeSelection();
-        }
-
-        if (targetNumberDropdown != null)
-        {
-            targetNumberDropdown.SetValueWithoutNotify(0);
-            targetNumberDropdown.RefreshShownValue();
-        }
-
-        RefreshView();
+        outcomeSelectionUI?.ApplySelection();
+        spinLifecycleController?.ExecuteSpin(result => RefreshView());
     }
 
     private void ClearBets()
@@ -425,87 +334,15 @@ public class GameUIController : MonoBehaviour
             return;
         }
 
-        if (ShouldWaitForWheelAnimation())
-        {
-            pendingRoundResult = roundResult;
-            return;
-        }
-
-        ApplyRoundResultToView(roundResult);
+        spinLifecycleController?.HandleRoundCompleted(roundResult);
         RefreshView();
-    }
-
-    private void ApplyRoundResultToView(RoundResultData roundResult)
-    {
-        roundResultPresenter?.PresentRoundResult(roundResult);
-    }
-
-    private void BindWheelAnimator()
-    {
-        if (wheelAnimator == null || wheelAnimatorBound)
-        {
-            return;
-        }
-
-        wheelAnimator.SpinAnimationStarted -= HandleSpinAnimationStarted;
-        wheelAnimator.SpinAnimationStarted += HandleSpinAnimationStarted;
-
-        wheelAnimator.SpinAnimationCompleted -= HandleSpinAnimationCompleted;
-        wheelAnimator.SpinAnimationCompleted += HandleSpinAnimationCompleted;
-
-        wheelAnimatorBound = true;
-    }
-
-    private void UnbindWheelAnimator()
-    {
-        if (wheelAnimator == null || !wheelAnimatorBound)
-        {
-            return;
-        }
-
-        wheelAnimator.SpinAnimationStarted -= HandleSpinAnimationStarted;
-        wheelAnimator.SpinAnimationCompleted -= HandleSpinAnimationCompleted;
-        wheelAnimatorBound = false;
-    }
-
-    private void HandleSpinAnimationStarted()
-    {
-        if (ShouldWaitForWheelAnimation())
-        {
-            SetControlsInteractable(false);
-        }
-    }
-
-    private void HandleSpinAnimationCompleted(RoundResultData roundResult)
-    {
-        RoundResultData finalResult = pendingRoundResult ?? roundResult;
-        pendingRoundResult = null;
-
-        ApplyRoundResultToView(finalResult);
-        RefreshView();
-        SetControlsInteractable(true);
-    }
-
-    private bool ShouldWaitForWheelAnimation()
-    {
-        return waitForWheelAnimation && wheelAnimator != null && wheelAnimator.enabled;
     }
 
     private void SetControlsInteractable(bool interactable)
     {
-        if (targetNumberDropdown != null)
-        {
-            targetNumberDropdown.interactable = interactable;
-        }
-
         if (spinButton != null)
         {
             spinButton.interactable = interactable;
-        }
-
-        if (clearSelectionButton != null)
-        {
-            clearSelectionButton.interactable = interactable;
         }
 
         if (clearBetsButton != null)

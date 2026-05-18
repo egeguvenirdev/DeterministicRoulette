@@ -9,7 +9,9 @@ public class GameUIController : MonoBehaviour
 {
     [Header("Controls")]
     [SerializeField] private TMP_Dropdown targetNumberDropdown;
-    [SerializeField] private TMP_InputField stakeInput;
+    // Used as chip value input (legacy field name kept to preserve existing Inspector binding).
+    [SerializeField] private TMP_InputField chipValueInput;
+    [SerializeField] private TMP_InputField stakeCountInput;
     [SerializeField] private Button spinButton;
     [SerializeField] private Button clearSelectionButton;
     [SerializeField] private Button clearBetsButton;
@@ -40,6 +42,7 @@ public class GameUIController : MonoBehaviour
     private void Awake()
     {
         SetupDropdowns();
+        NormalizeStakeInputs();
     }
 
     private void Start()
@@ -50,6 +53,8 @@ public class GameUIController : MonoBehaviour
     private void OnEnable()
     {
         WireButtons();
+        WireStakeInputs();
+        NormalizeStakeInputs();
 
         if (!initialized)
         {
@@ -102,6 +107,7 @@ public class GameUIController : MonoBehaviour
         UnbindWheelAnimator();
         UnbindBetBoardController();
 
+        UnwireStakeInputs();
         UnwireButtons();
     }
 
@@ -163,6 +169,63 @@ public class GameUIController : MonoBehaviour
 
         button.onClick.RemoveListener(action);
         button.onClick.AddListener(action);
+    }
+
+    private void WireStakeInputs()
+    {
+        if (chipValueInput != null)
+        {
+            chipValueInput.onEndEdit.RemoveListener(HandleChipValueEndEdit);
+            chipValueInput.onEndEdit.AddListener(HandleChipValueEndEdit);
+        }
+
+        if (stakeCountInput != null)
+        {
+            stakeCountInput.onEndEdit.RemoveListener(HandleStakeCountEndEdit);
+            stakeCountInput.onEndEdit.AddListener(HandleStakeCountEndEdit);
+        }
+    }
+
+    private void UnwireStakeInputs()
+    {
+        if (chipValueInput != null)
+        {
+            chipValueInput.onEndEdit.RemoveListener(HandleChipValueEndEdit);
+        }
+
+        if (stakeCountInput != null)
+        {
+            stakeCountInput.onEndEdit.RemoveListener(HandleStakeCountEndEdit);
+        }
+    }
+
+    private void HandleChipValueEndEdit(string _)
+    {
+        NormalizeInputField(chipValueInput);
+    }
+
+    private void HandleStakeCountEndEdit(string _)
+    {
+        NormalizeInputField(stakeCountInput);
+    }
+
+    private void NormalizeStakeInputs()
+    {
+        NormalizeInputField(chipValueInput);
+        NormalizeInputField(stakeCountInput);
+    }
+
+    private static void NormalizeInputField(TMP_InputField input)
+    {
+        if (input == null)
+        {
+            return;
+        }
+
+        if (!int.TryParse(input.text, out int value) || value <= 0)
+        {
+            input.text = "1";
+        }
     }
 
 
@@ -419,12 +482,39 @@ public class GameUIController : MonoBehaviour
     {
         stake = 0;
 
-        if (stakeInput == null)
+        if (chipValueInput == null)
         {
             return false;
         }
 
-        return int.TryParse(stakeInput.text, out stake) && stake > 0;
+        // If count input is not assigned yet, default to 1.
+        int chipValue = ParsePositiveOrDefault(chipValueInput, 1);
+        int stakeCount = ParsePositiveOrDefault(stakeCountInput, 1);
+
+        long totalStake = (long)chipValue * stakeCount;
+        if (totalStake <= 0 || totalStake > int.MaxValue)
+        {
+            return false;
+        }
+
+        stake = (int)totalStake;
+        return true;
+    }
+
+    private static int ParsePositiveOrDefault(TMP_InputField input, int fallback)
+    {
+        if (input == null)
+        {
+            return fallback;
+        }
+
+        if (!int.TryParse(input.text, out int value) || value <= 0)
+        {
+            input.text = fallback.ToString();
+            return fallback;
+        }
+
+        return value;
     }
 
     private void HandleRoundCompleted(RoundResultData roundResult)
@@ -529,9 +619,14 @@ public class GameUIController : MonoBehaviour
             targetNumberDropdown.interactable = interactable;
         }
 
-        if (stakeInput != null)
+        if (chipValueInput != null)
         {
-            stakeInput.interactable = interactable;
+            chipValueInput.interactable = interactable;
+        }
+
+        if (stakeCountInput != null)
+        {
+            stakeCountInput.interactable = interactable;
         }
 
         if (spinButton != null)

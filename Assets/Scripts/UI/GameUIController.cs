@@ -26,6 +26,7 @@ public class GameUIController : MonoBehaviour
     private bool initialized;
     private bool roundCompletedBound;
     private bool spinResultPresentedBound;
+    private bool controlsLockedByLifecycle;
 
     private void Awake()
     {
@@ -49,6 +50,7 @@ public class GameUIController : MonoBehaviour
         BindRoundCompleted();
         spinLifecycleController?.OnEnable();
         BindBetBoardController();
+        UpdateSpinButtonInteractable();
     }
 
     public void Initialize()
@@ -378,9 +380,11 @@ public class GameUIController : MonoBehaviour
 
     private void SetControlsInteractable(bool interactable)
     {
+        controlsLockedByLifecycle = !interactable;
+
         if (spinButton != null)
         {
-            spinButton.interactable = interactable;
+            UpdateSpinButtonInteractable();
         }
 
         if (clearBetsButton != null)
@@ -415,6 +419,23 @@ public class GameUIController : MonoBehaviour
         }
 
         roundResultPresenter?.UpdateTableTypeLabel(gameFacade.GetActiveBetSnapshot());
+        UpdateSpinButtonInteractable();
+    }
+
+    private void UpdateSpinButtonInteractable()
+    {
+        if (spinButton == null)
+        {
+            return;
+        }
+
+        if (controlsLockedByLifecycle)
+        {
+            spinButton.interactable = false;
+            return;
+        }
+
+        spinButton.interactable = gameFacade != null && gameFacade.IsReady && gameFacade.CanSpin();
     }
 
     private bool HasDependencies()

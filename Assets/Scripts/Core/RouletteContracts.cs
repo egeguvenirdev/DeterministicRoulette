@@ -6,6 +6,7 @@ public interface IOutcomeService
     void ClearSelection();
     int GetOutcome();
     int GetSelectedNumber();
+    string GetSelectionLabel();
     bool HasSelection();
 }
 

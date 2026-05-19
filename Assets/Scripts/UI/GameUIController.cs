@@ -19,11 +19,13 @@ public class GameUIController : MonoBehaviour
     [Header("Sub-controllers")]
     [SerializeField] private StakeInputHandler stakeInputHandler;
     [SerializeField] private RoundResultPresenter roundResultPresenter;
+    [SerializeField] private RoundHistoryListPresenter roundHistoryListPresenter;
     [SerializeField] private OutcomeSelectionUI outcomeSelectionUI;
     [SerializeField] private SpinLifecycleController spinLifecycleController;
 
     private bool initialized;
     private bool roundCompletedBound;
+    private bool spinResultPresentedBound;
 
     private void Awake()
     {
@@ -84,9 +86,12 @@ public class GameUIController : MonoBehaviour
         {
             spinLifecycleController.Initialize(gameFacade, roundResultPresenter);
             spinLifecycleController.ControlsInteractableRequested += SetControlsInteractable;
+            spinLifecycleController.ResultPresented += HandleSpinResultPresented;
+            spinResultPresentedBound = true;
         }
 
         initialized = true;
+        roundHistoryListPresenter?.RebuildFromState(gameFacade.GetGameState());
         RefreshView();
     }
 
@@ -101,6 +106,13 @@ public class GameUIController : MonoBehaviour
         if (spinLifecycleController != null)
         {
             spinLifecycleController.ControlsInteractableRequested -= SetControlsInteractable;
+
+            if (spinResultPresentedBound)
+            {
+                spinLifecycleController.ResultPresented -= HandleSpinResultPresented;
+                spinResultPresentedBound = false;
+            }
+
             spinLifecycleController.OnDisable();
         }
 
@@ -335,6 +347,32 @@ public class GameUIController : MonoBehaviour
         }
 
         spinLifecycleController?.HandleRoundCompleted(roundResult);
+
+        if (spinLifecycleController == null)
+        {
+            HandleSpinResultPresented(roundResult);
+        }
+    }
+
+    private void HandleSpinResultPresented(RoundResultData roundResult)
+    {
+        if (roundResult == null)
+        {
+            return;
+        }
+
+        if (roundHistoryListPresenter != null)
+        {
+            int spinIndex = 0;
+            GameStateData state = gameFacade != null ? gameFacade.GetGameState() : null;
+            if (state != null)
+            {
+                spinIndex = Mathf.Max(1, state.spinsPlayed);
+            }
+
+            roundHistoryListPresenter.AddRound(roundResult, spinIndex);
+        }
+
         RefreshView();
     }
 

@@ -73,6 +73,32 @@ public class OutcomeSelector : MonoBehaviour, IOutcomeService
     {
         return selectedNumber;
     }
+
+    public string GetSelectionLabel()
+    {
+        if (selectionPreset == OutcomeSelectionPreset.ExactNumber)
+        {
+            return selectedNumber >= 0 ? selectedNumber.ToString() : string.Empty;
+        }
+
+        switch (selectionPreset)
+        {
+            case OutcomeSelectionPreset.Red:
+                return "Red";
+            case OutcomeSelectionPreset.Black:
+                return "Black";
+            case OutcomeSelectionPreset.Even:
+                return "Even";
+            case OutcomeSelectionPreset.Odd:
+                return "Odd";
+            case OutcomeSelectionPreset.Low:
+                return "Low";
+            case OutcomeSelectionPreset.High:
+                return "High";
+            default:
+                return string.Empty;
+        }
+    }
     
     public bool HasSelection()
     {

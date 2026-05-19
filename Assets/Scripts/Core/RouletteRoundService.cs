@@ -39,6 +39,7 @@ public sealed class RouletteRoundService
         }
 
         int selectedNumber = outcomeService.HasSelection() ? outcomeService.GetSelectedNumber() : -1;
+        string selectedOutcomeLabel = outcomeService.HasSelection() ? outcomeService.GetSelectionLabel() : string.Empty;
         int resultNumber = outcomeService.GetOutcome();
         List<BetData> currentBets = betService.GetBetSnapshot();
         List<BetData> winningBets = payoutService.GetWinningBets(resultNumber, currentBets);
@@ -48,6 +49,7 @@ public sealed class RouletteRoundService
         RoundResultData roundResult = new RoundResultData
         {
             selectedNumber = selectedNumber,
+            selectedOutcomeLabel = selectedOutcomeLabel,
             resultNumber = resultNumber,
             winningBets = winningBets,
             losingBets = GetLosingBets(currentBets, winningBets),

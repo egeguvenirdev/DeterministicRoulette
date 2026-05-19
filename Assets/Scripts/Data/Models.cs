@@ -92,6 +92,7 @@ public class BetData
 public class RoundResultData
 {
     public int selectedNumber;
+    public string selectedOutcomeLabel;
     public int resultNumber;
     public List<BetData> winningBets;
     public List<BetData> losingBets;
@@ -101,6 +102,7 @@ public class RoundResultData
     
     public RoundResultData()
     {
+        selectedOutcomeLabel = string.Empty;
         winningBets = new List<BetData>();
         losingBets = new List<BetData>();
         timestamp = DateTime.Now;

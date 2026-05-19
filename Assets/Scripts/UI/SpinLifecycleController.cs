@@ -15,6 +15,7 @@ public class SpinLifecycleController : MonoBehaviour
 
 	private bool wheelAnimatorBound;
 	private RoundResultData pendingRoundResult;
+	private System.Action<RoundResultData> pendingSpinCompleteCallback;
 
 	private bool IsWaitingForAnimation => waitForWheelAnimation && wheelAnimator != null && wheelAnimator.enabled;
 
@@ -44,6 +45,8 @@ public class SpinLifecycleController : MonoBehaviour
 			return;
 		}
 
+		pendingSpinCompleteCallback = onSpinComplete;
+
 		EnsureWheelAnimatorReference();
 
 		if (IsWaitingForAnimation)
@@ -61,16 +64,10 @@ public class SpinLifecycleController : MonoBehaviour
 		RoundResultData roundResult = gameFacade.ExecuteSpin();
 		if (roundResult == null)
 		{
+			pendingSpinCompleteCallback = null;
 			onSpinComplete?.Invoke(null);
 			ControlsInteractableRequested?.Invoke(true);
 			return;
-		}
-
-		if (!IsWaitingForAnimation)
-		{
-			PresentResult(roundResult);
-			ControlsInteractableRequested?.Invoke(true);
-			onSpinComplete?.Invoke(roundResult);
 		}
 	}
 
@@ -88,6 +85,9 @@ public class SpinLifecycleController : MonoBehaviour
 			pendingRoundResult = roundResult;
 			return;
 		}
+
+		PresentResult(roundResult);
+		ControlsInteractableRequested?.Invoke(true);
 	}
 
 	private void HandleSpinAnimationCompleted(RoundResultData roundResult)
@@ -138,5 +138,7 @@ public class SpinLifecycleController : MonoBehaviour
 	{
 		roundResultPresenter?.PresentRoundResult(roundResult);
 		ResultPresented?.Invoke(roundResult);
+		pendingSpinCompleteCallback?.Invoke(roundResult);
+		pendingSpinCompleteCallback = null;
 	}
 }

@@ -31,4 +31,5 @@ public interface IStatisticsService
     GameStateData CurrentState { get; }
     bool CanAfford(int amount);
     void ApplyRound(RoundResultData roundResult, int totalStake);
+    void AddChips(int amount);
 }

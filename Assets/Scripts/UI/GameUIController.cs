@@ -26,6 +26,7 @@ public class GameUIController : MonoBehaviour
     private bool initialized;
     private bool roundCompletedBound;
     private bool spinResultPresentedBound;
+    private bool chipsChangedBound;
     private bool controlsLockedByLifecycle;
 
     private void Awake()
@@ -48,6 +49,7 @@ public class GameUIController : MonoBehaviour
         }
 
         BindRoundCompleted();
+        BindChipsChanged();
         spinLifecycleController?.OnEnable();
         BindBetBoardController();
         UpdateSpinButtonInteractable();
@@ -76,6 +78,7 @@ public class GameUIController : MonoBehaviour
 
         WireButtons();
         BindRoundCompleted();
+        BindChipsChanged();
         spinLifecycleController?.OnEnable();
         BindBetBoardController();
 
@@ -103,6 +106,12 @@ public class GameUIController : MonoBehaviour
         {
             gameFacade.RoundCompleted -= HandleRoundCompleted;
             roundCompletedBound = false;
+        }
+
+        if (gameFacade != null && chipsChangedBound)
+        {
+            gameFacade.ChipsChanged -= HandleChipsChanged;
+            chipsChangedBound = false;
         }
 
         if (spinLifecycleController != null)
@@ -485,5 +494,29 @@ public class GameUIController : MonoBehaviour
         gameFacade.RoundCompleted -= HandleRoundCompleted;
         gameFacade.RoundCompleted += HandleRoundCompleted;
         roundCompletedBound = true;
+    }
+
+    private void BindChipsChanged()
+    {
+        if (gameFacade == null || chipsChangedBound)
+        {
+            return;
+        }
+
+        gameFacade.ChipsChanged -= HandleChipsChanged;
+        gameFacade.ChipsChanged += HandleChipsChanged;
+        chipsChangedBound = true;
+    }
+
+    private void HandleChipsChanged(int _)
+    {
+        if (gameFacade == null)
+        {
+            return;
+        }
+
+        GameStateData state = gameFacade.GetGameState();
+        roundResultPresenter?.PresentGameState(state);
+        UpdateSpinButtonInteractable();
     }
 }

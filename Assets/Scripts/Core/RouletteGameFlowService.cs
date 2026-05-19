@@ -116,6 +116,11 @@ public class RouletteGameFlowService
         betManager.ClearBets();
     }
 
+    public void AddChips(int amount)
+    {
+        statisticsManager.AddChips(amount);
+    }
+
     /// <summary>
     /// Executes a spin with current bets and outcome selection.
     /// Returns null if spin cannot execute (insufficient funds, no bets, etc).

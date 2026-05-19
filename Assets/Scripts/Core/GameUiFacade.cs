@@ -13,8 +13,10 @@ public class GameUiFacade : MonoBehaviour
 
     private RouletteGameFlowService flowService;
     private bool roundCompletedBound;
+    private bool statisticsChipsBound;
 
     public event Action<RoundResultData> RoundCompleted;
+    public event Action<int> ChipsChanged;
 
     public bool IsReady => flowService != null && gameManager != null;
 
@@ -27,11 +29,13 @@ public class GameUiFacade : MonoBehaviour
     {
         BuildFlowService();
         BindRoundCompleted();
+        BindStatisticsEvents();
     }
 
     private void OnDisable()
     {
         UnbindRoundCompleted();
+        UnbindStatisticsEvents();
     }
 
     public bool CanSpin()
@@ -117,6 +121,16 @@ public class GameUiFacade : MonoBehaviour
         }
 
         flowService.ClearAllBets();
+    }
+
+    public void AddChips(int amount)
+    {
+        if (!IsReady)
+        {
+            return;
+        }
+
+        flowService.AddChips(amount);
     }
 
     public int GetActiveBetCount()
@@ -232,5 +246,33 @@ public class GameUiFacade : MonoBehaviour
     private void HandleRoundCompleted(RoundResultData roundResult)
     {
         RoundCompleted?.Invoke(roundResult);
+    }
+
+    private void BindStatisticsEvents()
+    {
+        if (statisticsManager == null || statisticsChipsBound)
+        {
+            return;
+        }
+
+        statisticsManager.ChipsChanged -= HandleStatisticsChipsChanged;
+        statisticsManager.ChipsChanged += HandleStatisticsChipsChanged;
+        statisticsChipsBound = true;
+    }
+
+    private void UnbindStatisticsEvents()
+    {
+        if (statisticsManager == null || !statisticsChipsBound)
+        {
+            return;
+        }
+
+        statisticsManager.ChipsChanged -= HandleStatisticsChipsChanged;
+        statisticsChipsBound = false;
+    }
+
+    private void HandleStatisticsChipsChanged(int totalChips)
+    {
+        ChipsChanged?.Invoke(totalChips);
     }
 }

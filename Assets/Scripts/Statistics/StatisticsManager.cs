@@ -1,10 +1,13 @@
 using UnityEngine;
+using System;
 
 public class StatisticsManager : MonoBehaviour, IStatisticsService
 {
     [SerializeField] private int startingChips = 1000;
 
     private GameStateData gameState;
+
+    public event Action<int> ChipsChanged;
 
     public GameStateData CurrentState
     {
@@ -50,6 +53,20 @@ public class StatisticsManager : MonoBehaviour, IStatisticsService
         }
 
         gameState.roundHistory.Add(roundResult);
+        ChipsChanged?.Invoke(gameState.totalChips);
+    }
+
+    public void AddChips(int amount)
+    {
+        EnsureState();
+
+        if (amount <= 0)
+        {
+            return;
+        }
+
+        gameState.totalChips += amount;
+        ChipsChanged?.Invoke(gameState.totalChips);
     }
 
     private void EnsureState()

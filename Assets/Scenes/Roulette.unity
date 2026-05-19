@@ -1906,6 +1906,30 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 304186147621235094, guid: 14443e59e760f15479d568eca8af6e69, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 304186147621235094, guid: 14443e59e760f15479d568eca8af6e69, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 304186147621235094, guid: 14443e59e760f15479d568eca8af6e69, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 304186147621235094, guid: 14443e59e760f15479d568eca8af6e69, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 304186147621235094, guid: 14443e59e760f15479d568eca8af6e69, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 304186147621235094, guid: 14443e59e760f15479d568eca8af6e69, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 372507776672100166, guid: 14443e59e760f15479d568eca8af6e69, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -3745,6 +3769,38 @@ PrefabInstance:
     - target: {fileID: 8758093683559468140, guid: 14443e59e760f15479d568eca8af6e69, type: 3}
       propertyPath: m_AnchorMin.y
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8841605817667896586, guid: 14443e59e760f15479d568eca8af6e69, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8841605817667896586, guid: 14443e59e760f15479d568eca8af6e69, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 8841605817667896586, guid: 14443e59e760f15479d568eca8af6e69, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 2028901237}
+    - target: {fileID: 8841605817667896586, guid: 14443e59e760f15479d568eca8af6e69, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 8841605817667896586, guid: 14443e59e760f15479d568eca8af6e69, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: AddChips
+      objectReference: {fileID: 0}
+    - target: {fileID: 8841605817667896586, guid: 14443e59e760f15479d568eca8af6e69, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: GameUiFacade, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 8841605817667896586, guid: 14443e59e760f15479d568eca8af6e69, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_IntArgument
+      value: 1000
+      objectReference: {fileID: 0}
+    - target: {fileID: 8841605817667896586, guid: 14443e59e760f15479d568eca8af6e69, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
       objectReference: {fileID: 0}
     - target: {fileID: 8843552332178411299, guid: 14443e59e760f15479d568eca8af6e69, type: 3}
       propertyPath: m_AnchorMax.y

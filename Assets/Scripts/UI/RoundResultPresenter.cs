@@ -32,14 +32,47 @@ public class RoundResultPresenter : MonoBehaviour
         }
 
         bool hasWinningBet = roundResult.winningBets != null && roundResult.winningBets.Count > 0;
-        if (winningsAmountText != null && hasWinningBet && roundResult.totalWinnings > 0)
+        bool hasPositiveWinnings = roundResult.totalWinnings > 0;
+
+        if (winningsAmountText != null && (hasWinningBet || hasPositiveWinnings))
         {
             string winningTypes = BuildWinningBetTypesLabel(roundResult.winningBets);
-            winningsAmountText.text = $"<color=#00FF00>+ {roundResult.totalWinnings} ({winningTypes})</color>";
+            if (string.IsNullOrEmpty(winningTypes))
+            {
+                winningsAmountText.text = $"<color=#00FF00>+ {roundResult.totalWinnings}</color>";
+            }
+            else
+            {
+                winningsAmountText.text = $"<color=#00FF00>+ {roundResult.totalWinnings} ({winningTypes})</color>";
+            }
         }
         else if (winningsAmountText != null)
         {
             winningsAmountText.text = $"<color=#FF0000>- {roundResult.totalLosses}</color>";
+        }
+    }
+
+    public void PresentLastRoundFromState(GameStateData state)
+    {
+        if (state == null || state.roundHistory == null || state.roundHistory.Count == 0)
+        {
+            ClearRoundResult();
+            return;
+        }
+
+        PresentRoundResult(state.roundHistory[state.roundHistory.Count - 1]);
+    }
+
+    public void ClearRoundResult()
+    {
+        if (winningNumberText != null)
+        {
+            winningNumberText.text = "-";
+        }
+
+        if (winningsAmountText != null)
+        {
+            winningsAmountText.text = "-";
         }
     }
 
@@ -99,6 +132,11 @@ public class RoundResultPresenter : MonoBehaviour
 
     private static string BuildWinningBetTypesLabel(List<BetData> winningBets)
     {
+        if (winningBets == null || winningBets.Count == 0)
+        {
+            return string.Empty;
+        }
+
         List<string> labels = new List<string>();
         for (int i = 0; i < winningBets.Count; i++)
         {

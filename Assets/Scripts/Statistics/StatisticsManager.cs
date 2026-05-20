@@ -69,6 +69,38 @@ public class StatisticsManager : MonoBehaviour, IStatisticsService
         ChipsChanged?.Invoke(gameState.totalChips);
     }
 
+    public void ResetState()
+    {
+        gameState = new GameStateData
+        {
+            totalChips = startingChips
+        };
+
+        ChipsChanged?.Invoke(gameState.totalChips);
+    }
+
+    public void SetState(GameStateData state)
+    {
+        if (state == null)
+        {
+            ResetState();
+            return;
+        }
+
+        gameState = new GameStateData
+        {
+            totalChips = Mathf.Max(0, state.totalChips),
+            spinsPlayed = Mathf.Max(0, state.spinsPlayed),
+            totalWins = Mathf.Max(0, state.totalWins),
+            totalLosses = Mathf.Max(0, state.totalLosses),
+            netProfit = state.netProfit,
+            rouletteType = state.rouletteType,
+            roundHistory = state.roundHistory != null ? new System.Collections.Generic.List<RoundResultData>(state.roundHistory) : new System.Collections.Generic.List<RoundResultData>()
+        };
+
+        ChipsChanged?.Invoke(gameState.totalChips);
+    }
+
     private void EnsureState()
     {
         if (gameState != null)

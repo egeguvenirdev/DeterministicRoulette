@@ -133,6 +133,30 @@ public class GameUiFacade : MonoBehaviour
         flowService.AddChips(amount);
     }
 
+    public void ResetGameState()
+    {
+        if (!IsReady)
+        {
+            return;
+        }
+
+        flowService.ClearAllBets();
+        flowService.ClearOutcomeSelection();
+        statisticsManager.ResetState();
+    }
+
+    public void ApplyLoadedState(GameStateData loadedState)
+    {
+        if (!IsReady)
+        {
+            return;
+        }
+
+        flowService.ClearAllBets();
+        flowService.ClearOutcomeSelection();
+        statisticsManager.SetState(loadedState);
+    }
+
     public int GetActiveBetCount()
     {
         if (!IsReady)

@@ -4,6 +4,7 @@ using UnityEngine.UI;
 using TMPro;
 using UnityEngine.Events;
 
+
 public class GameUIController : MonoBehaviour
 {
     [Header("Controls")]
@@ -15,6 +16,9 @@ public class GameUIController : MonoBehaviour
 
     [Header("Gameplay Facade")]
     [SerializeField] private GameUiFacade gameFacade;
+
+    [Header("Save/Load")]
+    [SerializeField] private Button resetGameButton;
 
     [Header("Sub-controllers")]
     [SerializeField] private StakeInputHandler stakeInputHandler;
@@ -28,16 +32,25 @@ public class GameUIController : MonoBehaviour
     private bool spinResultPresentedBound;
     private bool chipsChangedBound;
     private bool controlsLockedByLifecycle;
+    private bool pendingChipsUiRefresh;
 
     private void Awake()
     {
         // Component initialization happens in child components
+        if (resetGameButton != null)
+        {
+            resetGameButton.onClick.RemoveAllListeners();
+            resetGameButton.onClick.AddListener(ResetGame);
+        }
     }
+
 
     private void Start()
     {
         Initialize();
+        LoadGameState();
     }
+
 
     private void OnEnable()
     {
@@ -52,8 +65,11 @@ public class GameUIController : MonoBehaviour
         BindChipsChanged();
         spinLifecycleController?.OnEnable();
         BindBetBoardController();
+        SaveGameState();
         UpdateSpinButtonInteractable();
     }
+
+
 
     public void Initialize()
     {
@@ -97,6 +113,57 @@ public class GameUIController : MonoBehaviour
 
         initialized = true;
         roundHistoryListPresenter?.RebuildFromState(gameFacade.GetGameState());
+        RefreshView();
+    }
+
+    // --- SAVE/LOAD ---
+    private void SaveGameState()
+    {
+        if (gameFacade == null)
+        {
+            return;
+        }
+
+        GameStateData state = gameFacade.GetGameState();
+        if (state == null)
+        {
+            return;
+        }
+
+        GameSaveManager.SaveGame(state);
+    }
+
+    private void LoadGameState()
+    {
+        if (gameFacade == null)
+        {
+            return;
+        }
+
+        if (GameSaveManager.TryLoadGame(out GameStateData loadedState))
+        {
+            gameFacade.ApplyLoadedState(loadedState);
+            GameStateData stateAfterLoad = gameFacade.GetGameState();
+            roundHistoryListPresenter?.RebuildFromState(stateAfterLoad);
+            roundResultPresenter?.PresentLastRoundFromState(stateAfterLoad);
+        }
+        else
+        {
+            roundResultPresenter?.ClearRoundResult();
+        }
+
+        RefreshView();
+    }
+
+    public void ResetGame()
+    {
+        GameSaveManager.ResetGame();
+        if (gameFacade != null)
+        {
+            gameFacade.ResetGameState();
+            roundHistoryListPresenter?.RebuildFromState(gameFacade.GetGameState());
+        }
+        roundResultPresenter?.ClearRoundResult();
         RefreshView();
     }
 
@@ -384,7 +451,9 @@ public class GameUIController : MonoBehaviour
             roundHistoryListPresenter.AddRound(roundResult, spinIndex);
         }
 
+        pendingChipsUiRefresh = false;
         RefreshView();
+        SaveGameState();
     }
 
     private void SetControlsInteractable(bool interactable)
@@ -427,6 +496,7 @@ public class GameUIController : MonoBehaviour
             betBoardController.ClearChipVisuals();
         }
 
+        roundResultPresenter?.PresentLastRoundFromState(state);
         roundResultPresenter?.UpdateTableTypeLabel(gameFacade.GetActiveBetSnapshot());
         UpdateSpinButtonInteractable();
     }
@@ -513,6 +583,18 @@ public class GameUIController : MonoBehaviour
         if (gameFacade == null)
         {
             return;
+        }
+
+        // Keep chips UI in sync with result presentation timing.
+        if (controlsLockedByLifecycle)
+        {
+            pendingChipsUiRefresh = true;
+            return;
+        }
+
+        if (pendingChipsUiRefresh)
+        {
+            pendingChipsUiRefresh = false;
         }
 
         GameStateData state = gameFacade.GetGameState();

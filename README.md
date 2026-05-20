@@ -62,6 +62,21 @@ The implementation emphasizes:
 - Payout evaluation per round is implemented.
 - Multi-round gameplay loop is fully supported.
 
+### 4) Save, Load, and Reset System
+- PlayerPrefs-based persistence is implemented.
+- Core player/game progression is saved and restored:
+  - total chips
+  - spins played
+  - total wins/losses
+  - net profit
+  - round history (result, selected outcome label, won/lost totals)
+- State is loaded on startup and UI is rebuilt from loaded data.
+- Save is triggered after round result presentation.
+- Full reset flow is implemented via Reset Game button:
+  - saved data is cleared
+  - runtime state is reset
+  - history/result UI is cleared and rebuilt
+
 ## Architecture Overview
 The project is structured to keep game rules, UI behavior, and presentation concerns separated.
 
@@ -122,7 +137,7 @@ The project is structured to keep game rules, UI behavior, and presentation conc
 - Add richer highlight effects for winning outcomes
 
 ### Optional Extensions
-- Save/Load game state (auto-save + resume)
+- Extend persistence to include active bets and in-progress round inputs
 - American roulette mode (double-zero)
 - Additional automated play-mode test coverage
 

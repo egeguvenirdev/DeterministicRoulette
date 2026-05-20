@@ -24,10 +24,10 @@ public class GameUIController : MonoBehaviour
 
     private bool initialized;
     private bool roundCompletedBound;
-    private bool spinResultPresentedBound;
     private bool chipsChangedBound;
     private bool controlsLockedByLifecycle;
-    private bool pendingChipsUiRefresh;
+    private GameUiBetActions betActions;
+    private GameUiPersistenceCoordinator persistenceCoordinator;
 
 
     private void Start()
@@ -75,6 +75,9 @@ public class GameUIController : MonoBehaviour
             return;
         }
 
+        betActions = new GameUiBetActions(gameFacade, stakeInputHandler, this);
+        persistenceCoordinator = new GameUiPersistenceCoordinator(gameFacade, roundHistoryListPresenter, roundResultPresenter);
+
         BindRoundCompleted();
         BindChipsChanged();
         spinLifecycleController?.OnEnable();
@@ -90,7 +93,6 @@ public class GameUIController : MonoBehaviour
             spinLifecycleController.Initialize(gameFacade, roundResultPresenter);
             spinLifecycleController.ControlsInteractableRequested += SetControlsInteractable;
             spinLifecycleController.ResultPresented += HandleSpinResultPresented;
-            spinResultPresentedBound = true;
         }
 
         initialized = true;
@@ -101,51 +103,18 @@ public class GameUIController : MonoBehaviour
     // --- SAVE/LOAD ---
     private void SaveGameState()
     {
-        if (gameFacade == null)
-        {
-            return;
-        }
-
-        GameStateData state = gameFacade.GetGameState();
-        if (state == null)
-        {
-            return;
-        }
-
-        GameSaveManager.SaveGame(state);
+        persistenceCoordinator?.SaveGameState();
     }
 
     private void LoadGameState()
     {
-        if (gameFacade == null)
-        {
-            return;
-        }
-
-        if (GameSaveManager.TryLoadGame(out GameStateData loadedState))
-        {
-            gameFacade.ApplyLoadedState(loadedState);
-            GameStateData stateAfterLoad = gameFacade.GetGameState();
-            roundHistoryListPresenter?.RebuildFromState(stateAfterLoad);
-            roundResultPresenter?.PresentLastRoundFromState(stateAfterLoad);
-        }
-        else
-        {
-            roundResultPresenter?.ClearRoundResult();
-        }
-
+        persistenceCoordinator?.LoadGameState();
         RefreshView();
     }
 
     public void ResetGame()
     {
-        GameSaveManager.ResetGame();
-        if (gameFacade != null)
-        {
-            gameFacade.ResetGameState();
-            roundHistoryListPresenter?.RebuildFromState(gameFacade.GetGameState());
-        }
-        roundResultPresenter?.ClearRoundResult();
+        persistenceCoordinator?.ResetGameState();
         RefreshView();
     }
 
@@ -166,12 +135,7 @@ public class GameUIController : MonoBehaviour
         if (spinLifecycleController != null)
         {
             spinLifecycleController.ControlsInteractableRequested -= SetControlsInteractable;
-
-            if (spinResultPresentedBound)
-            {
-                spinLifecycleController.ResultPresented -= HandleSpinResultPresented;
-                spinResultPresentedBound = false;
-            }
+            spinLifecycleController.ResultPresented -= HandleSpinResultPresented;
 
             spinLifecycleController.OnDisable();
         }
@@ -219,31 +183,8 @@ public class GameUIController : MonoBehaviour
 
     public bool TryAddBetForCell(RouletteBetCellView cell)
     {
-        if (cell == null)
+        if (betActions == null || !betActions.TryAddBetForCell(initialized, cell))
         {
-            return false;
-        }
-
-        if (!IsReadyForBetActions())
-        {
-            return false;
-        }
-
-        if (!TryGetStake(out int stake))
-        {
-            Debug.LogWarning("[GameUIController] Invalid stake.");
-            return false;
-        }
-
-        if (cell.BetType == BetType.Straight && (cell.Number < 0 || cell.Number > 36))
-        {
-            Debug.LogWarning("[GameUIController] Target number out of range.");
-            return false;
-        }
-
-        if (!gameFacade.TryAddBet(cell.BetType, stake, cell.Number, cell.TargetNumbers))
-        {
-            Debug.LogWarning("[GameUIController] Bet rejected.");
             return false;
         }
 
@@ -253,17 +194,7 @@ public class GameUIController : MonoBehaviour
 
     public bool TryRemoveBetForCell(RouletteBetCellView cell)
     {
-        if (cell == null)
-        {
-            return false;
-        }
-
-        if (!IsReadyForBetActions())
-        {
-            return false;
-        }
-
-        if (!gameFacade.TryRemoveBet(cell.BetType, cell.Number, cell.TargetNumbers))
+        if (betActions == null || !betActions.TryRemoveBetForCell(initialized, cell))
         {
             return false;
         }
@@ -277,28 +208,8 @@ public class GameUIController : MonoBehaviour
     /// </summary>
     public bool TryAddBetFromOption(RouletteNeighborCalculator.BetOption option)
     {
-        if (option == null || option.targetNumbers == null || option.targetNumbers.Count == 0)
+        if (betActions == null || !betActions.TryAddBetFromOption(initialized, option))
         {
-            return false;
-        }
-
-        if (!IsReadyForBetActions())
-        {
-            return false;
-        }
-
-        if (!TryGetStake(out int stake))
-        {
-            Debug.LogWarning("[GameUIController] Invalid stake.");
-            return false;
-        }
-
-        // For Straight bets use targetNumbers[0] as the specific target; multi-number bets use -1.
-        int targetNumber = option.betType == BetType.Straight ? option.targetNumbers[0] : -1;
-
-        if (!gameFacade.TryAddBet(option.betType, stake, targetNumber, option.targetNumbers))
-        {
-            Debug.LogWarning("[GameUIController] Bet from option rejected.");
             return false;
         }
 
@@ -312,45 +223,13 @@ public class GameUIController : MonoBehaviour
     /// </summary>
     public bool TryRemoveBetFromOption(RouletteNeighborCalculator.BetOption option)
     {
-        if (option == null || option.targetNumbers == null || option.targetNumbers.Count == 0)
-        {
-            return false;
-        }
-
-        if (!IsReadyForBetActions())
-        {
-            return false;
-        }
-
-        if (!gameFacade.TryRemoveBet(option.betType, -1, option.targetNumbers))
+        if (betActions == null || !betActions.TryRemoveBetFromOption(initialized, option))
         {
             return false;
         }
 
         RefreshView();
         return true;
-    }
-
-    private bool TryGetStake(out int stake)
-    {
-        if (stakeInputHandler != null)
-        {
-            return stakeInputHandler.TryGetStake(out stake);
-        }
-
-        stake = 0;
-        return false;
-    }
-
-    private bool IsReadyForBetActions()
-    {
-        if (initialized && gameFacade != null && gameFacade.IsReady)
-        {
-            return true;
-        }
-
-        Debug.LogWarning("[GameUIController] UI is not initialized. Check serialized gameplay facade wiring.", this);
-        return false;
     }
 
     private void HandleRoundCompleted(RoundResultData roundResult)
@@ -387,7 +266,6 @@ public class GameUIController : MonoBehaviour
             roundHistoryListPresenter.AddRound(roundResult, spinIndex);
         }
 
-        pendingChipsUiRefresh = false;
         RefreshView();
         SaveGameState();
     }
@@ -521,16 +399,9 @@ public class GameUIController : MonoBehaviour
             return;
         }
 
-        // Keep chips UI in sync with result presentation timing.
         if (controlsLockedByLifecycle)
         {
-            pendingChipsUiRefresh = true;
             return;
-        }
-
-        if (pendingChipsUiRefresh)
-        {
-            pendingChipsUiRefresh = false;
         }
 
         GameStateData state = gameFacade.GetGameState();

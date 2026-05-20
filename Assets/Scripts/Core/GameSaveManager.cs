@@ -34,15 +34,6 @@ public static class GameSaveManager
     private const string SpinsKey = "Spins";
     private const string WinsKey = "Wins";
     private const string LossesKey = "Losses";
-    private const string BetsKey = "Bets";
-    private const string LastWinnerKey = "LastWinner";
-    private const string LastAmountKey = "LastAmount";
-    private const string TableStatusKey = "TableStatus";
-
-    public static bool HasSave()
-    {
-        return PlayerPrefs.HasKey(GameStateJsonKey) || PlayerPrefs.HasKey(ChipsKey);
-    }
 
     public static void SaveGame(GameStateData state)
     {
@@ -156,45 +147,6 @@ public static class GameSaveManager
         return true;
     }
 
-    // Save
-    public static void SaveGame(int chips, int spins, int wins, int losses, string bets, int lastWinner, int lastAmount, string tableStatus)
-    {
-        GameStateData legacyState = new GameStateData
-        {
-            totalChips = chips,
-            spinsPlayed = spins,
-            totalWins = wins,
-            totalLosses = losses,
-            roundHistory = new List<RoundResultData>()
-        };
-
-        SaveGame(legacyState);
-
-        PlayerPrefs.SetInt(ChipsKey, chips);
-        PlayerPrefs.SetInt(SpinsKey, spins);
-        PlayerPrefs.SetInt(WinsKey, wins);
-        PlayerPrefs.SetInt(LossesKey, losses);
-        PlayerPrefs.SetString(BetsKey, bets ?? "");
-        PlayerPrefs.SetInt(LastWinnerKey, lastWinner);
-        PlayerPrefs.SetInt(LastAmountKey, lastAmount);
-        PlayerPrefs.SetString(TableStatusKey, tableStatus ?? "");
-        PlayerPrefs.Save();
-    }
-
-    // Load
-    public static void LoadGame(out int chips, out int spins, out int wins, out int losses, out string bets, out int lastWinner, out int lastAmount, out string tableStatus)
-    {
-        chips = PlayerPrefs.GetInt(ChipsKey, 1000);
-        spins = PlayerPrefs.GetInt(SpinsKey, 0);
-        wins = PlayerPrefs.GetInt(WinsKey, 0);
-        losses = PlayerPrefs.GetInt(LossesKey, 0);
-        bets = PlayerPrefs.GetString(BetsKey, "");
-        lastWinner = PlayerPrefs.GetInt(LastWinnerKey, -1);
-        lastAmount = PlayerPrefs.GetInt(LastAmountKey, -1);
-        tableStatus = PlayerPrefs.GetString(TableStatusKey, "");
-    }
-
-    // Reset
     public static void ResetGame()
     {
         PlayerPrefs.DeleteKey(GameStateJsonKey);
@@ -202,10 +154,6 @@ public static class GameSaveManager
         PlayerPrefs.DeleteKey(SpinsKey);
         PlayerPrefs.DeleteKey(WinsKey);
         PlayerPrefs.DeleteKey(LossesKey);
-        PlayerPrefs.DeleteKey(BetsKey);
-        PlayerPrefs.DeleteKey(LastWinnerKey);
-        PlayerPrefs.DeleteKey(LastAmountKey);
-        PlayerPrefs.DeleteKey(TableStatusKey);
         PlayerPrefs.Save();
     }
 }

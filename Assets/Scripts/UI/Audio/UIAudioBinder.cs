@@ -11,7 +11,6 @@ public class UIAudioBinder : MonoBehaviour
     [SerializeField] private bool autoBindOnEnable = true;
     [SerializeField] private bool includeInactive = true;
     [SerializeField] private bool bindLegacyDropdown = true;
-    [SerializeField] private bool bindLegacyInputField = false;
 
     private readonly Dictionary<Button, UnityAction> buttonHandlers = new Dictionary<Button, UnityAction>();
     private readonly Dictionary<TMP_Dropdown, UnityAction<int>> tmpDropdownHandlers = new Dictionary<TMP_Dropdown, UnityAction<int>>();
@@ -53,11 +52,6 @@ public class UIAudioBinder : MonoBehaviour
         BindToggles();
         BindSliders();
         BindTMPInputFields();
-
-        if (bindLegacyInputField)
-        {
-            BindInputFields();
-        }
     }
 
     public void UnbindAll()
@@ -212,16 +206,6 @@ public class UIAudioBinder : MonoBehaviour
         for (int i = 0; i < inputFields.Length; i++)
         {
             TMP_InputField component = inputFields[i];
-            BindPointerForwarder(component.gameObject, UIAudioEventType.InputFocus);
-        }
-    }
-
-    private void BindInputFields()
-    {
-        InputField[] inputFields = GetComponentsInChildren<InputField>(includeInactive);
-        for (int i = 0; i < inputFields.Length; i++)
-        {
-            InputField component = inputFields[i];
             BindPointerForwarder(component.gameObject, UIAudioEventType.InputFocus);
         }
     }

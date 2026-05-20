@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
 
 
 public class GameUIController : MonoBehaviour
@@ -16,9 +15,6 @@ public class GameUIController : MonoBehaviour
     [Header("Gameplay Facade")]
     [SerializeField] private GameUiFacade gameFacade;
 
-    [Header("Save/Load")]
-    [SerializeField] private Button resetGameButton;
-
     [Header("Sub-controllers")]
     [SerializeField] private StakeInputHandler stakeInputHandler;
     [SerializeField] private RoundResultPresenter roundResultPresenter;
@@ -32,11 +28,6 @@ public class GameUIController : MonoBehaviour
     private bool chipsChangedBound;
     private bool controlsLockedByLifecycle;
     private bool pendingChipsUiRefresh;
-
-    private void Awake()
-    {
-        // Reset button wiring is configured manually in the Inspector.
-    }
 
 
     private void Start()
@@ -226,36 +217,6 @@ public class GameUIController : MonoBehaviour
         RefreshView();
     }
 
-    public bool TryAddStraightBetForNumber(int targetNumber)
-    {
-        if (!initialized || gameFacade == null || !gameFacade.IsReady)
-        {
-            Debug.LogWarning("[GameUIController] UI is not initialized. Check serialized gameplay facade wiring.", this);
-            return false;
-        }
-
-        if (targetNumber < 0 || targetNumber > 36)
-        {
-            Debug.LogWarning("Target number out of range.");
-            return false;
-        }
-
-        if (!TryGetStake(out int stake))
-        {
-            Debug.LogWarning("Invalid stake");
-            return false;
-        }
-
-        if (!gameFacade.TryAddStraightBet(targetNumber, stake))
-        {
-            Debug.LogWarning("Bet rejected");
-            return false;
-        }
-
-        RefreshView();
-        return true;
-    }
-
     public bool TryAddBetForCell(RouletteBetCellView cell)
     {
         if (cell == null)
@@ -263,27 +224,26 @@ public class GameUIController : MonoBehaviour
             return false;
         }
 
-        if (!initialized || gameFacade == null || !gameFacade.IsReady)
+        if (!IsReadyForBetActions())
         {
-            Debug.LogWarning("[GameUIController] UI is not initialized. Check serialized gameplay facade wiring.", this);
             return false;
         }
 
         if (!TryGetStake(out int stake))
         {
-            Debug.LogWarning("Invalid stake");
+            Debug.LogWarning("[GameUIController] Invalid stake.");
             return false;
         }
 
         if (cell.BetType == BetType.Straight && (cell.Number < 0 || cell.Number > 36))
         {
-            Debug.LogWarning("Target number out of range.");
+            Debug.LogWarning("[GameUIController] Target number out of range.");
             return false;
         }
 
         if (!gameFacade.TryAddBet(cell.BetType, stake, cell.Number, cell.TargetNumbers))
         {
-            Debug.LogWarning("Bet rejected");
+            Debug.LogWarning("[GameUIController] Bet rejected.");
             return false;
         }
 
@@ -298,9 +258,8 @@ public class GameUIController : MonoBehaviour
             return false;
         }
 
-        if (!initialized || gameFacade == null || !gameFacade.IsReady)
+        if (!IsReadyForBetActions())
         {
-            Debug.LogWarning("[GameUIController] UI is not initialized. Check serialized gameplay facade wiring.", this);
             return false;
         }
 
@@ -323,9 +282,8 @@ public class GameUIController : MonoBehaviour
             return false;
         }
 
-        if (!initialized || gameFacade == null || !gameFacade.IsReady)
+        if (!IsReadyForBetActions())
         {
-            Debug.LogWarning("[GameUIController] UI is not initialized. Check serialized gameplay facade wiring.", this);
             return false;
         }
 
@@ -359,9 +317,8 @@ public class GameUIController : MonoBehaviour
             return false;
         }
 
-        if (!initialized || gameFacade == null || !gameFacade.IsReady)
+        if (!IsReadyForBetActions())
         {
-            Debug.LogWarning("[GameUIController] UI is not initialized. Check serialized gameplay facade wiring.", this);
             return false;
         }
 
@@ -382,6 +339,17 @@ public class GameUIController : MonoBehaviour
         }
 
         stake = 0;
+        return false;
+    }
+
+    private bool IsReadyForBetActions()
+    {
+        if (initialized && gameFacade != null && gameFacade.IsReady)
+        {
+            return true;
+        }
+
+        Debug.LogWarning("[GameUIController] UI is not initialized. Check serialized gameplay facade wiring.", this);
         return false;
     }
 

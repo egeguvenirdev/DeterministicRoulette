@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 8102623681269747128}
   - component: {fileID: 2646521562272888781}
   - component: {fileID: 3158654512999497412}
+  - component: {fileID: 480029520182248547}
   m_Layer: 0
   m_Name: Text_WinningsAmount
   m_TagString: Untagged
@@ -157,6 +158,22 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: 0
   m_LayoutPriority: 1
+--- !u!114 &480029520182248547
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2664436601877082}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 07b40dc03879d744bbe005ede0a4cf3d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PulseOnTmpTextChange
+  targetText: {fileID: 2646521562272888781}
+  targetTransform: {fileID: 4313374846077292114}
+  duration: 0.2
+  maxScaleMultiplier: 1.2
 --- !u!1 &124583559570377137
 GameObject:
   m_ObjectHideFlags: 0
@@ -3336,6 +3353,7 @@ GameObject:
   - component: {fileID: 3406612470226782013}
   - component: {fileID: 4823385400783627222}
   - component: {fileID: 7989618834175348849}
+  - component: {fileID: 4328487473982851798}
   m_Layer: 0
   m_Name: Text_BetsSummary
   m_TagString: Untagged
@@ -3481,6 +3499,22 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: 0
   m_LayoutPriority: 1
+--- !u!114 &4328487473982851798
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1769730595558202288}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 07b40dc03879d744bbe005ede0a4cf3d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PulseOnTmpTextChange
+  targetText: {fileID: 4823385400783627222}
+  targetTransform: {fileID: 7275339084320437594}
+  duration: 0.2
+  maxScaleMultiplier: 1.2
 --- !u!1 &1809196456087558026
 GameObject:
   m_ObjectHideFlags: 0
@@ -4312,6 +4346,7 @@ GameObject:
   - component: {fileID: 234754781053512655}
   - component: {fileID: 7998319738194608491}
   - component: {fileID: 6369620286884462007}
+  - component: {fileID: 9094560762135462275}
   m_Layer: 0
   m_Name: Text_WinningNumberAmount
   m_TagString: Untagged
@@ -4457,6 +4492,22 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: 0
   m_LayoutPriority: 1
+--- !u!114 &9094560762135462275
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2201998954431046897}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 07b40dc03879d744bbe005ede0a4cf3d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PulseOnTmpTextChange
+  targetText: {fileID: 7998319738194608491}
+  targetTransform: {fileID: 8014416664025632486}
+  duration: 0.2
+  maxScaleMultiplier: 1.2
 --- !u!1 &2287655353944737507
 GameObject:
   m_ObjectHideFlags: 0
@@ -7088,6 +7139,7 @@ GameObject:
   - component: {fileID: 8716703819098165122}
   - component: {fileID: 1195140610708056111}
   - component: {fileID: 7082657054496680900}
+  - component: {fileID: 4046510632657032396}
   m_Layer: 0
   m_Name: Text_Stats
   m_TagString: Untagged
@@ -7233,6 +7285,22 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: 0
   m_LayoutPriority: 1
+--- !u!114 &4046510632657032396
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3188744536155296270}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 07b40dc03879d744bbe005ede0a4cf3d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PulseOnTmpTextChange
+  targetText: {fileID: 1195140610708056111}
+  targetTransform: {fileID: 249331606035925297}
+  duration: 0.2
+  maxScaleMultiplier: 1.2
 --- !u!1 &3285835511669766881
 GameObject:
   m_ObjectHideFlags: 0
@@ -11256,6 +11324,7 @@ GameObject:
   - component: {fileID: 4777736542283512331}
   - component: {fileID: 8381646551949118913}
   - component: {fileID: 4386044879253327718}
+  - component: {fileID: 2296096543242802076}
   m_Layer: 0
   m_Name: Text_Chips
   m_TagString: Untagged
@@ -11401,6 +11470,22 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: 0
   m_LayoutPriority: 1
+--- !u!114 &2296096543242802076
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6410091660294216940}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 07b40dc03879d744bbe005ede0a4cf3d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PulseOnTmpTextChange
+  targetText: {fileID: 8381646551949118913}
+  targetTransform: {fileID: 7397563023361760788}
+  duration: 0.2
+  maxScaleMultiplier: 1.2
 --- !u!1 &6705048857312683460
 GameObject:
   m_ObjectHideFlags: 0
@@ -14006,6 +14091,7 @@ GameObject:
   - component: {fileID: 3452777191579910282}
   - component: {fileID: 3633153624955494379}
   - component: {fileID: 513969022840346916}
+  - component: {fileID: 5624686773538570814}
   m_Layer: 0
   m_Name: Text_Status
   m_TagString: Untagged
@@ -14151,6 +14237,22 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: 0
   m_LayoutPriority: 1
+--- !u!114 &5624686773538570814
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8676889166023682891}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 07b40dc03879d744bbe005ede0a4cf3d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PulseOnTmpTextChange
+  targetText: {fileID: 3633153624955494379}
+  targetTransform: {fileID: 5117127613938769179}
+  duration: 0.2
+  maxScaleMultiplier: 1.2
 --- !u!1 &8934847995051250471
 GameObject:
   m_ObjectHideFlags: 0

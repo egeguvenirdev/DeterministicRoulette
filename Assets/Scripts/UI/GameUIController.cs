@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using UnityEngine.Events;
 
 
 public class GameUIController : MonoBehaviour
@@ -36,12 +35,7 @@ public class GameUIController : MonoBehaviour
 
     private void Awake()
     {
-        // Component initialization happens in child components
-        if (resetGameButton != null)
-        {
-            resetGameButton.onClick.RemoveAllListeners();
-            resetGameButton.onClick.AddListener(ResetGame);
-        }
+        // Reset button wiring is configured manually in the Inspector.
     }
 
 
@@ -54,8 +48,6 @@ public class GameUIController : MonoBehaviour
 
     private void OnEnable()
     {
-        WireButtons();
-
         if (!initialized)
         {
             return;
@@ -92,7 +84,6 @@ public class GameUIController : MonoBehaviour
             return;
         }
 
-        WireButtons();
         BindRoundCompleted();
         BindChipsChanged();
         spinLifecycleController?.OnEnable();
@@ -195,39 +186,16 @@ public class GameUIController : MonoBehaviour
         }
 
         UnbindBetBoardController();
-        UnwireButtons();
     }
 
-
-
-    private void WireButtons()
+    public void OnSpinButtonClicked()
     {
-        BindButton(spinButton, Spin);
-        BindButton(clearBetsButton, ClearBets);
+        Spin();
     }
 
-    private void UnwireButtons()
+    public void OnClearBetsButtonClicked()
     {
-        if (spinButton != null)
-        {
-            spinButton.onClick.RemoveListener(Spin);
-        }
-
-        if (clearBetsButton != null)
-        {
-            clearBetsButton.onClick.RemoveListener(ClearBets);
-        }
-    }
-
-    private void BindButton(Button button, UnityAction action)
-    {
-        if (button == null)
-        {
-            return;
-        }
-
-        button.onClick.RemoveListener(action);
-        button.onClick.AddListener(action);
+        ClearBets();
     }
 
 

@@ -126,11 +126,6 @@ The project is structured to keep game rules, UI behavior, and presentation conc
 - Assets/Scripts/Data
 
 ## Known Issues / Future Improvements
-### Planned Audio Improvements
-- Add dedicated Ball Drop SFX
-- Add Round Won SFX
-- Add Round Lost SFX
-
 ### Planned Visual Improvements
 - Add win VFX (confetti/chip sparkle)
 - Add richer highlight effects for winning outcomes

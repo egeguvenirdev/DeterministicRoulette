@@ -83,6 +83,7 @@ public class RouletteWheelAnimator : MonoBehaviour
     [Header("Audio")]
     [SerializeField] private GameAudioService gameAudioService;
     [SerializeField] private GameAudioEventId spinStartAudioEvent = GameAudioEventId.SpinStart;
+    [SerializeField] private GameAudioEventId ballDropAudioEvent = GameAudioEventId.BallDrop;
 
     public event Action SpinAnimationStarted;
     public event Action<RoundResultData> SpinAnimationCompleted;
@@ -351,6 +352,7 @@ public class RouletteWheelAnimator : MonoBehaviour
         wheelAngle = targetWheelAngle;
         ballAngle = targetBallAngle;
         PlaceBall(ballAngle, finalRadius, pocketHeight);
+        TriggerBallDropAudio();
 
         yield return StartCoroutine(PlaySettleJitter(settleAngleForSpin));
 
@@ -540,5 +542,15 @@ public class RouletteWheelAnimator : MonoBehaviour
         }
 
         gameAudioService.Play(spinStartAudioEvent);
+    }
+
+    private void TriggerBallDropAudio()
+    {
+        if (gameAudioService == null || ballDropAudioEvent == GameAudioEventId.None)
+        {
+            return;
+        }
+
+        gameAudioService.Play(ballDropAudioEvent);
     }
 }

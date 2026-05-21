@@ -11,17 +11,20 @@ public sealed class BetBoardPopupFlow
     private readonly BetBoardChipVisualService chipVisualService;
     private readonly Func<int, RouletteBetCellView> findNumberCell;
     private readonly Func<RouletteNeighborCalculator.BetOption, bool> tryAddBetFromOption;
+    private readonly Action onBetPlaced;
 
     public BetBoardPopupFlow(
         BetBoardSelectionState selectionState,
         BetBoardChipVisualService chipVisualService,
         Func<int, RouletteBetCellView> findNumberCell,
-        Func<RouletteNeighborCalculator.BetOption, bool> tryAddBetFromOption)
+        Func<RouletteNeighborCalculator.BetOption, bool> tryAddBetFromOption,
+        Action onBetPlaced = null)
     {
         this.selectionState = selectionState;
         this.chipVisualService = chipVisualService;
         this.findNumberCell = findNumberCell;
         this.tryAddBetFromOption = tryAddBetFromOption;
+        this.onBetPlaced = onBetPlaced;
     }
 
     /// <summary>Called when the popup fires OptionSelected.</summary>
@@ -57,5 +60,6 @@ public sealed class BetBoardPopupFlow
         }
 
         selectionState?.SetOptionForOrigin(originCell, option);
+        onBetPlaced?.Invoke();
     }
 }

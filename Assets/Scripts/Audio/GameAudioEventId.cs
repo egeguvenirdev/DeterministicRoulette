@@ -10,7 +10,12 @@ public enum GameAudioEventId
     UiSliderChanged,
     UiInputFocus,
 
-    SpinStart
+    SpinStart,
+    BallDrop,
+    RoundWon,
+    RoundLost,
+    ChipDrop,
+    AmbientMusic
 }
 
 public enum GameAudioBus

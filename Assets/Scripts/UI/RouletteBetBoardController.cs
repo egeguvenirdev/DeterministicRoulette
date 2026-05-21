@@ -13,6 +13,10 @@ public class RouletteBetBoardController : MonoBehaviour
     [Header("Popup")]
     [SerializeField] private BetTypePickerPopup betTypePickerPopup;
 
+    [Header("Audio")]
+    [SerializeField] private GameAudioService gameAudioService;
+    [SerializeField] private GameAudioEventId chipDropAudioEvent = GameAudioEventId.ChipDrop;
+
     private BetBoardChipVisualService chipVisualService;
     private BetBoardSelectionState selectionState;
     private BetBoardPopupFlow popupFlow;
@@ -23,7 +27,7 @@ public class RouletteBetBoardController : MonoBehaviour
     {
         chipVisualService = new BetBoardChipVisualService(boardCanvas, chipLayerParent, chipVisualPrefab, this);
         selectionState = new BetBoardSelectionState();
-        popupFlow = new BetBoardPopupFlow(selectionState, chipVisualService, FindNumberCell, c => gameUIController != null && gameUIController.TryAddBetFromOption(c));
+        popupFlow = new BetBoardPopupFlow(selectionState, chipVisualService, FindNumberCell, c => gameUIController != null && gameUIController.TryAddBetFromOption(c), TriggerChipDrop);
         removeStrategy = new BetBoardRemoveStrategy(selectionState, chipVisualService, c => gameUIController != null && gameUIController.TryRemoveBetForCell(c), c => gameUIController != null && gameUIController.TryRemoveBetFromOption(c));
     }
 
@@ -148,6 +152,17 @@ public class RouletteBetBoardController : MonoBehaviour
 
         chipVisualService?.EnsureChipForCell(cell);
         selectionState?.SetCoveredCellOrigin(cell, cell);
+        TriggerChipDrop();
+    }
+
+    private void TriggerChipDrop()
+    {
+        if (gameAudioService == null || chipDropAudioEvent == GameAudioEventId.None)
+        {
+            return;
+        }
+
+        gameAudioService.Play(chipDropAudioEvent);
     }
 
     private RouletteBetCellView FindNumberCell(int number)

@@ -22,6 +22,9 @@ public class GameUIController : MonoBehaviour
     [SerializeField] private OutcomeSelectionUI outcomeSelectionUI;
     [SerializeField] private SpinLifecycleController spinLifecycleController;
 
+    [Header("Audio")]
+    [SerializeField] private GameAudioService gameAudioService;
+
     private bool initialized;
     private GameUiBetActions betActions;
     private GameUiPersistenceCoordinator persistenceCoordinator;
@@ -82,7 +85,8 @@ public class GameUIController : MonoBehaviour
             spinLifecycleController,
             roundHistoryListPresenter,
             persistenceCoordinator,
-            RefreshView);
+            RefreshView,
+            gameAudioService);
 
         eventBinder = new GameUiEventBinder(
             gameFacade,

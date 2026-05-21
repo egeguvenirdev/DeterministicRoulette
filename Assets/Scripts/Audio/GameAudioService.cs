@@ -15,8 +15,19 @@ public class GameAudioService : MonoBehaviour
     [Header("Debug")]
     [SerializeField] private bool logMissingEvents;
 
+    [Header("Startup Music")]
+    [SerializeField] private GameAudioEventId startupMusicEvent = GameAudioEventId.None;
+
     private readonly Dictionary<GameAudioEventId, float> lastPlayTimeByEvent = new Dictionary<GameAudioEventId, float>();
     private readonly Dictionary<GameAudioEventId, int> activeVoicesByEvent = new Dictionary<GameAudioEventId, int>();
+
+    private void Start()
+    {
+        if (startupMusicEvent != GameAudioEventId.None)
+        {
+            PlayMusic(startupMusicEvent);
+        }
+    }
 
     public void Play(GameAudioEventId eventId)
     {
@@ -26,6 +37,46 @@ public class GameAudioService : MonoBehaviour
     public void PlayAt(GameAudioEventId eventId, Vector3 worldPosition)
     {
         PlayInternal(eventId, worldPosition);
+    }
+
+    /// <summary>Plays the given event on the music source with looping enabled.</summary>
+    public void PlayMusic(GameAudioEventId eventId)
+    {
+        if (musicSource == null || eventBank == null)
+        {
+            return;
+        }
+
+        if (!eventBank.TryGet(eventId, out GameAudioEventDefinition definition) || definition == null)
+        {
+            if (logMissingEvents)
+            {
+                Debug.LogWarning($"[GameAudioService] Missing audio event definition: {eventId}", this);
+            }
+            return;
+        }
+
+        AudioClip clip = definition.PickClip();
+        if (clip == null)
+        {
+            return;
+        }
+
+        musicSource.clip = clip;
+        musicSource.volume = Mathf.Clamp01(definition.baseVolume);
+        musicSource.loop = true;
+        musicSource.Play();
+    }
+
+    /// <summary>Stops the music source.</summary>
+    public void StopMusic()
+    {
+        if (musicSource == null)
+        {
+            return;
+        }
+
+        musicSource.Stop();
     }
 
     private void PlayInternal(GameAudioEventId eventId, Vector3? worldPosition)

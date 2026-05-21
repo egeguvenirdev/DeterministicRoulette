@@ -1169,7 +1169,6 @@ MonoBehaviour:
   autoBindOnEnable: 1
   includeInactive: 1
   bindLegacyDropdown: 1
-  bindLegacyInputField: 0
 --- !u!1 &1436931521
 GameObject:
   m_ObjectHideFlags: 0
@@ -1577,6 +1576,7 @@ MonoBehaviour:
   sfxSource: {fileID: 1841742380}
   musicSource: {fileID: 1841742379}
   logMissingEvents: 0
+  startupMusicEvent: 13
 --- !u!4 &1841742383
 Transform:
   m_ObjectHideFlags: 0
@@ -1958,6 +1958,10 @@ PrefabInstance:
       propertyPath: gameFacade
       value: 
       objectReference: {fileID: 2028901237}
+    - target: {fileID: 374784865786565846, guid: 14443e59e760f15479d568eca8af6e69, type: 3}
+      propertyPath: gameAudioService
+      value: 
+      objectReference: {fileID: 1841742382}
     - target: {fileID: 376671887029147590, guid: 14443e59e760f15479d568eca8af6e69, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -1986,6 +1990,10 @@ PrefabInstance:
       propertyPath: boardCanvas
       value: 
       objectReference: {fileID: 1177861575}
+    - target: {fileID: 402597172867651790, guid: 14443e59e760f15479d568eca8af6e69, type: 3}
+      propertyPath: gameAudioService
+      value: 
+      objectReference: {fileID: 1841742382}
     - target: {fileID: 402597172867651790, guid: 14443e59e760f15479d568eca8af6e69, type: 3}
       propertyPath: betTypePickerPopup
       value: 
@@ -3163,6 +3171,30 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6720678825315573850, guid: 14443e59e760f15479d568eca8af6e69, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6752193711636755412, guid: 14443e59e760f15479d568eca8af6e69, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6752193711636755412, guid: 14443e59e760f15479d568eca8af6e69, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6752193711636755412, guid: 14443e59e760f15479d568eca8af6e69, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6752193711636755412, guid: 14443e59e760f15479d568eca8af6e69, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6752193711636755412, guid: 14443e59e760f15479d568eca8af6e69, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6752193711636755412, guid: 14443e59e760f15479d568eca8af6e69, type: 3}
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}

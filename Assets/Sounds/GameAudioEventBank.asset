@@ -79,9 +79,54 @@ MonoBehaviour:
   - eventId: 8
     bus: 1
     spatialize3D: 0
+    baseVolume: 0.346
+    cooldownSeconds: 0
+    maxSimultaneous: 0
+    variations:
+    - clip: {fileID: 8300000, guid: 55467894b868895418290074f97403ec, type: 3}
+      weight: 0
+  - eventId: 9
+    bus: 1
+    spatialize3D: 0
+    baseVolume: 0.25
+    cooldownSeconds: 0
+    maxSimultaneous: 0
+    variations:
+    - clip: {fileID: 8300000, guid: cf074005589dfca4b9e3b4dd5fb3366e, type: 3}
+      weight: 0
+  - eventId: 10
+    bus: 1
+    spatialize3D: 0
     baseVolume: 0.5
     cooldownSeconds: 0
     maxSimultaneous: 0
     variations:
-    - clip: {fileID: 8300000, guid: c9d8fd993174d3240ac1476f5fabc4ed, type: 3}
+    - clip: {fileID: 8300000, guid: 0cf4c5f94e61030479b52d01df8ecf3c, type: 3}
+      weight: 0
+  - eventId: 11
+    bus: 1
+    spatialize3D: 0
+    baseVolume: 0.5
+    cooldownSeconds: 0
+    maxSimultaneous: 0
+    variations:
+    - clip: {fileID: 8300000, guid: f46120c44c4fa674ea4464a9d3f05155, type: 3}
+      weight: 0
+  - eventId: 12
+    bus: 1
+    spatialize3D: 0
+    baseVolume: 0.374
+    cooldownSeconds: 0
+    maxSimultaneous: 0
+    variations:
+    - clip: {fileID: 8300000, guid: c2464d5e400e3ad4a83ecbdc82a14ef4, type: 3}
+      weight: 0
+  - eventId: 13
+    bus: 1
+    spatialize3D: 0
+    baseVolume: 0.033
+    cooldownSeconds: 0
+    maxSimultaneous: 0
+    variations:
+    - clip: {fileID: 8300000, guid: bbd85c522b5cd414692b1c4856761d90, type: 3}
       weight: 0

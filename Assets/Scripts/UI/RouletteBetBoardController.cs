@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -16,26 +15,30 @@ public class RouletteBetBoardController : MonoBehaviour
 
     private BetBoardChipVisualService chipVisualService;
     private BetBoardSelectionState selectionState;
+    private BetBoardPopupFlow popupFlow;
+    private BetBoardRemoveStrategy removeStrategy;
     private bool isBoardInteractable = true;
 
     private void Awake()
     {
         chipVisualService = new BetBoardChipVisualService(boardCanvas, chipLayerParent, chipVisualPrefab, this);
         selectionState = new BetBoardSelectionState();
+        popupFlow = new BetBoardPopupFlow(selectionState, chipVisualService, FindNumberCell, c => gameUIController != null && gameUIController.TryAddBetFromOption(c));
+        removeStrategy = new BetBoardRemoveStrategy(selectionState, chipVisualService, c => gameUIController != null && gameUIController.TryRemoveBetForCell(c), c => gameUIController != null && gameUIController.TryRemoveBetFromOption(c));
     }
 
     private void OnEnable()
     {
         BindCells();
         if (betTypePickerPopup != null)
-            betTypePickerPopup.OptionSelected += OnBetOptionSelected;
+            betTypePickerPopup.OptionSelected += popupFlow.OnOptionSelected;
     }
 
     private void OnDisable()
     {
         UnbindCells();
         if (betTypePickerPopup != null)
-            betTypePickerPopup.OptionSelected -= OnBetOptionSelected;
+            betTypePickerPopup.OptionSelected -= popupFlow.OnOptionSelected;
     }
 
     public void Initialize(GameUIController controller)
@@ -122,15 +125,14 @@ public class RouletteBetBoardController : MonoBehaviour
             return;
         }
 
-        // Check if this cell (or any cell it belongs to) is covered by an existing bet
-        RouletteBetCellView origin = GetOriginCell(cell);
+        RouletteBetCellView origin = removeStrategy?.GetOriginCell(cell);
         if (origin != null)
         {
-            RemoveBetAndChips(origin);
+            removeStrategy.RemoveBetAndChips(origin);
             return;
         }
 
-        // For number cells (Straight), show popup to let the player choose bet type
+        // For number cells (Straight), show popup to let the player choose bet type.
         if (cell.BetType == BetType.Straight && betTypePickerPopup != null)
         {
             selectionState?.SetPendingOrigin(cell);
@@ -138,7 +140,7 @@ public class RouletteBetBoardController : MonoBehaviour
             return;
         }
 
-        // Outside bets (Red, Black, Dozen, Column, etc.) are placed directly
+        // Outside bets (Red, Black, Dozen, Column, etc.) are placed directly.
         if (!gameUIController.TryAddBetForCell(cell))
         {
             return;
@@ -146,86 +148,6 @@ public class RouletteBetBoardController : MonoBehaviour
 
         chipVisualService?.EnsureChipForCell(cell);
         selectionState?.SetCoveredCellOrigin(cell, cell);
-    }
-
-    // ── Popup integration ────────────────────────────────────────────────────
-
-    private void OnBetOptionSelected(RouletteNeighborCalculator.BetOption option)
-    {
-        RouletteBetCellView origin = selectionState?.ConsumePendingOrigin();
-        if (origin == null)
-        {
-            return;
-        }
-
-        HandleOptionSelected(origin, option);
-    }
-
-    private void HandleOptionSelected(RouletteBetCellView originCell, RouletteNeighborCalculator.BetOption option)
-    {
-        if (!gameUIController.TryAddBetFromOption(option))
-        {
-            return;
-        }
-
-        // Place chips on every number cell covered by this bet
-        foreach (int number in option.targetNumbers)
-        {
-            RouletteBetCellView coveredCell = FindNumberCell(number);
-            if (coveredCell == null)
-            {
-                continue;
-            }
-
-            chipVisualService?.EnsureChipForCell(coveredCell);
-            selectionState?.SetCoveredCellOrigin(coveredCell, originCell);
-        }
-
-        selectionState?.SetOptionForOrigin(originCell, option);
-    }
-
-    /// <summary>Returns the origin cell for the given cell if a bet chip exists on it, otherwise null.</summary>
-    private RouletteBetCellView GetOriginCell(RouletteBetCellView cell)
-    {
-        RouletteBetCellView origin = selectionState?.GetOriginForCell(cell);
-        if (origin != null)
-        {
-            return origin;
-        }
-
-        // Fallback for directly placed chips (outside bets added before tracking was wired)
-        if (chipVisualService != null && chipVisualService.HasChip(cell))
-        {
-            return cell;
-        }
-
-        return null;
-    }
-
-    private void RemoveBetAndChips(RouletteBetCellView origin)
-    {
-        // Remove the bet from the game model
-        if (selectionState != null && selectionState.TryGetOptionForOrigin(origin, out RouletteNeighborCalculator.BetOption option))
-        {
-            gameUIController.TryRemoveBetFromOption(option);
-        }
-        else
-        {
-            gameUIController.TryRemoveBetForCell(origin);
-        }
-
-        // Remove chip visuals from all cells covered by this origin
-        List<RouletteBetCellView> covered = selectionState != null
-            ? selectionState.GetCoveredCellsForOrigin(origin)
-            : new List<RouletteBetCellView>();
-
-        foreach (RouletteBetCellView c in covered)
-        {
-            chipVisualService?.RemoveChipForCell(c);
-            selectionState?.RemoveCoveredCell(c);
-        }
-
-        selectionState?.RemoveOrigin(origin);
     }
 
     private RouletteBetCellView FindNumberCell(int number)

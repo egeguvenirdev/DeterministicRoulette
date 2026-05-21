@@ -124,7 +124,7 @@ MonoBehaviour:
   - eventId: 13
     bus: 1
     spatialize3D: 0
-    baseVolume: 0.033
+    baseVolume: 0.025
     cooldownSeconds: 0
     maxSimultaneous: 0
     variations:

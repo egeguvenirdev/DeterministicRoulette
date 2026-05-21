@@ -23,11 +23,11 @@ public class GameUIController : MonoBehaviour
     [SerializeField] private SpinLifecycleController spinLifecycleController;
 
     private bool initialized;
-    private bool roundCompletedBound;
-    private bool chipsChangedBound;
-    private bool controlsLockedByLifecycle;
     private GameUiBetActions betActions;
     private GameUiPersistenceCoordinator persistenceCoordinator;
+    private GameUiViewSync viewSync;
+    private GameUiRoundFlowCoordinator roundFlowCoordinator;
+    private GameUiEventBinder eventBinder;
 
 
     private void Start()
@@ -44,12 +44,10 @@ public class GameUIController : MonoBehaviour
             return;
         }
 
-        BindRoundCompleted();
-        BindChipsChanged();
-        spinLifecycleController?.OnEnable();
+        eventBinder?.Bind();
         BindBetBoardController();
         SaveGameState();
-        UpdateSpinButtonInteractable();
+        RefreshView();
     }
 
 
@@ -77,10 +75,24 @@ public class GameUIController : MonoBehaviour
 
         betActions = new GameUiBetActions(gameFacade, stakeInputHandler, this);
         persistenceCoordinator = new GameUiPersistenceCoordinator(gameFacade, roundHistoryListPresenter, roundResultPresenter);
+        viewSync = new GameUiViewSync(gameFacade, spinButton, clearBetsButton, stakeInputHandler, betBoardController, roundResultPresenter);
+        roundFlowCoordinator = new GameUiRoundFlowCoordinator(
+            gameFacade,
+            outcomeSelectionUI,
+            spinLifecycleController,
+            roundHistoryListPresenter,
+            persistenceCoordinator,
+            RefreshView);
 
-        BindRoundCompleted();
-        BindChipsChanged();
-        spinLifecycleController?.OnEnable();
+        eventBinder = new GameUiEventBinder(
+            gameFacade,
+            spinLifecycleController,
+            roundFlowCoordinator.HandleRoundCompleted,
+            _ => viewSync.HandleChipsChanged(),
+            viewSync.SetControlsInteractable,
+            roundFlowCoordinator.HandleSpinResultPresented);
+
+        eventBinder.Bind();
         BindBetBoardController();
 
         if (outcomeSelectionUI != null)
@@ -88,12 +100,7 @@ public class GameUIController : MonoBehaviour
             outcomeSelectionUI.Initialize(gameFacade);
         }
 
-        if (spinLifecycleController != null)
-        {
-            spinLifecycleController.Initialize(gameFacade, roundResultPresenter);
-            spinLifecycleController.ControlsInteractableRequested += SetControlsInteractable;
-            spinLifecycleController.ResultPresented += HandleSpinResultPresented;
-        }
+        spinLifecycleController?.Initialize(gameFacade, roundResultPresenter);
 
         initialized = true;
         roundHistoryListPresenter?.RebuildFromState(gameFacade.GetGameState());
@@ -120,25 +127,7 @@ public class GameUIController : MonoBehaviour
 
     private void OnDisable()
     {
-        if (gameFacade != null && roundCompletedBound)
-        {
-            gameFacade.RoundCompleted -= HandleRoundCompleted;
-            roundCompletedBound = false;
-        }
-
-        if (gameFacade != null && chipsChangedBound)
-        {
-            gameFacade.ChipsChanged -= HandleChipsChanged;
-            chipsChangedBound = false;
-        }
-
-        if (spinLifecycleController != null)
-        {
-            spinLifecycleController.ControlsInteractableRequested -= SetControlsInteractable;
-            spinLifecycleController.ResultPresented -= HandleSpinResultPresented;
-
-            spinLifecycleController.OnDisable();
-        }
+        eventBinder?.Unbind();
 
         UnbindBetBoardController();
     }
@@ -157,13 +146,7 @@ public class GameUIController : MonoBehaviour
 
     private void Spin()
     {
-        if (!initialized || gameFacade == null || !gameFacade.IsReady)
-        {
-            return;
-        }
-
-        outcomeSelectionUI?.ApplySelection();
-        spinLifecycleController?.ExecuteSpin(result => RefreshView());
+        roundFlowCoordinator?.Spin(initialized);
     }
 
     private void ClearBets()
@@ -178,7 +161,7 @@ public class GameUIController : MonoBehaviour
             betBoardController.ClearChipVisuals();
         }
 
-        RefreshView();
+        viewSync?.RefreshView();
     }
 
     public bool TryAddBetForCell(RouletteBetCellView cell)
@@ -232,103 +215,9 @@ public class GameUIController : MonoBehaviour
         return true;
     }
 
-    private void HandleRoundCompleted(RoundResultData roundResult)
-    {
-        if (roundResult == null)
-        {
-            return;
-        }
-
-        spinLifecycleController?.HandleRoundCompleted(roundResult);
-
-        if (spinLifecycleController == null)
-        {
-            HandleSpinResultPresented(roundResult);
-        }
-    }
-
-    private void HandleSpinResultPresented(RoundResultData roundResult)
-    {
-        if (roundResult == null)
-        {
-            return;
-        }
-
-        if (roundHistoryListPresenter != null)
-        {
-            int spinIndex = 0;
-            GameStateData state = gameFacade != null ? gameFacade.GetGameState() : null;
-            if (state != null)
-            {
-                spinIndex = Mathf.Max(1, state.spinsPlayed);
-            }
-
-            roundHistoryListPresenter.AddRound(roundResult, spinIndex);
-        }
-
-        RefreshView();
-        SaveGameState();
-    }
-
-    private void SetControlsInteractable(bool interactable)
-    {
-        controlsLockedByLifecycle = !interactable;
-
-        if (spinButton != null)
-        {
-            UpdateSpinButtonInteractable();
-        }
-
-        if (clearBetsButton != null)
-        {
-            clearBetsButton.interactable = interactable;
-        }
-
-        stakeInputHandler?.SetInteractable(interactable);
-
-        if (betBoardController != null)
-        {
-            betBoardController.SetBoardInteractable(interactable);
-        }
-    }
-
     private void RefreshView()
     {
-        if (gameFacade == null)
-        {
-            return;
-        }
-
-        GameStateData state = gameFacade.GetGameState();
-        roundResultPresenter?.PresentGameState(state);
-
-        int betCount = gameFacade.GetActiveBetCount();
-        roundResultPresenter?.PresentBets(betCount, gameFacade.GetTotalStake());
-
-        if (betBoardController != null && betCount == 0)
-        {
-            betBoardController.ClearChipVisuals();
-        }
-
-        roundResultPresenter?.PresentLastRoundFromState(state);
-        roundResultPresenter?.UpdateTableTypeLabel(gameFacade.GetActiveBetSnapshot());
-        UpdateSpinButtonInteractable();
-    }
-
-    private void UpdateSpinButtonInteractable()
-    {
-        if (spinButton == null)
-        {
-            return;
-        }
-
-        if (controlsLockedByLifecycle)
-        {
-            spinButton.interactable = false;
-            return;
-        }
-
-        spinButton.interactable = gameFacade != null && gameFacade.IsReady && gameFacade.CanSpin();
+        viewSync?.RefreshView();
     }
 
     private bool HasDependencies()
@@ -368,44 +257,4 @@ public class GameUIController : MonoBehaviour
         betBoardController.Initialize(null);
     }
 
-    private void BindRoundCompleted()
-    {
-        if (gameFacade == null || roundCompletedBound)
-        {
-            return;
-        }
-
-        gameFacade.RoundCompleted -= HandleRoundCompleted;
-        gameFacade.RoundCompleted += HandleRoundCompleted;
-        roundCompletedBound = true;
-    }
-
-    private void BindChipsChanged()
-    {
-        if (gameFacade == null || chipsChangedBound)
-        {
-            return;
-        }
-
-        gameFacade.ChipsChanged -= HandleChipsChanged;
-        gameFacade.ChipsChanged += HandleChipsChanged;
-        chipsChangedBound = true;
-    }
-
-    private void HandleChipsChanged(int _)
-    {
-        if (gameFacade == null)
-        {
-            return;
-        }
-
-        if (controlsLockedByLifecycle)
-        {
-            return;
-        }
-
-        GameStateData state = gameFacade.GetGameState();
-        roundResultPresenter?.PresentGameState(state);
-        UpdateSpinButtonInteractable();
-    }
 }

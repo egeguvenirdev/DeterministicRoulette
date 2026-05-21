@@ -98,12 +98,6 @@ public class OutcomeSelectionUI : MonoBehaviour
         List<TMP_Dropdown.OptionData> options = new List<TMP_Dropdown.OptionData>();
 
         AddOption(options, "Random", OutcomeSelectionPreset.Random, -1);
-        AddOption(options, "Red", OutcomeSelectionPreset.Red, -1);
-        AddOption(options, "Black", OutcomeSelectionPreset.Black, -1);
-        AddOption(options, "Even", OutcomeSelectionPreset.Even, -1);
-        AddOption(options, "Odd", OutcomeSelectionPreset.Odd, -1);
-        AddOption(options, "Low (1-18)", OutcomeSelectionPreset.Low, -1);
-        AddOption(options, "High (19-36)", OutcomeSelectionPreset.High, -1);
 
         for (int number = 0; number <= 36; number++)
         {

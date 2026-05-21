@@ -2,6 +2,9 @@
 
 A Unity 6000.x case-study prototype focused on deterministic roulette outcomes, full betting flow, round-based result evaluation, and clean UI/gameplay synchronization.
 
+## Gameplay Video
+[Watch on Google Drive](https://drive.google.com/drive/folders/1dlJugbGFwE58fwwE9NCVqpvyFOwIiMLF?usp=drive_link)
+
 ## Project Summary
 This project implements a 3D single-player roulette prototype where the player can either:
 
@@ -121,10 +124,6 @@ The project is structured to keep game rules, UI behavior, and presentation conc
 - Assets/Scripts/UI
 - Assets/Scripts/Audio
 - Assets/Scripts/Data
-
-## Demo
-- Gameplay Video: TBD
-- Optional Build Link: TBD
 
 ## Known Issues / Future Improvements
 ### Planned Audio Improvements

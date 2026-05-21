@@ -9946,12 +9946,12 @@ MonoBehaviour:
   clearBetsButton: {fileID: 4171921715185623449}
   betBoardController: {fileID: 402597172867651790}
   gameFacade: {fileID: 0}
-  resetGameButton: {fileID: 0}
   stakeInputHandler: {fileID: 5935344901035494302}
   roundResultPresenter: {fileID: 5454895005587785771}
   roundHistoryListPresenter: {fileID: 8861039591543051141}
   outcomeSelectionUI: {fileID: 5193211363219387588}
   spinLifecycleController: {fileID: 5695420993164410306}
+  gameAudioService: {fileID: 0}
 --- !u!114 &402597172867651790
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10019,6 +10019,8 @@ MonoBehaviour:
   - {fileID: 8495457112230826157}
   - {fileID: 6660801550951615256}
   betTypePickerPopup: {fileID: 0}
+  gameAudioService: {fileID: 0}
+  chipDropAudioEvent: 12
 --- !u!114 &5935344901035494302
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11063,7 +11065,7 @@ GameObject:
   - component: {fileID: 2754793685413448271}
   - component: {fileID: 2684560976711393374}
   m_Layer: 5
-  m_Name: Image
+  m_Name: Container
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -11087,7 +11089,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 360, y: -142}
+  m_AnchoredPosition: {x: 360, y: -85}
   m_SizeDelta: {x: 854, y: 470}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &9075252799954897536

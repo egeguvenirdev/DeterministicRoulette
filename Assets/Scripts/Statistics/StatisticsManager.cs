@@ -1,6 +1,9 @@
 using UnityEngine;
 using System;
 
+/// <summary>
+/// Tracks the player's chips, round totals, and game history.
+/// </summary>
 public class StatisticsManager : MonoBehaviour, IStatisticsService
 {
     [SerializeField] private int startingChips = 1000;

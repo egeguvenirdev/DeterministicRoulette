@@ -1,6 +1,10 @@
 using UnityEngine;
 using System.Collections.Generic;
 
+/// <summary>
+/// Selects a roulette outcome from an exact number, a preset, or all available numbers.
+/// </summary>
+
 public class OutcomeSelector : MonoBehaviour, IOutcomeService
 {
     private RouletteRulesDatabase rulesDb;

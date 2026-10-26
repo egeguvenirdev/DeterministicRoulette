@@ -1,6 +1,9 @@
 using UnityEngine;
 using System.Collections.Generic;
 
+/// <summary>
+/// Determines which bets win and calculates payouts using the configured roulette rules.
+/// </summary>
 public class PayoutCalculator : MonoBehaviour, IPayoutService
 {
     private RouletteRulesDatabase rulesDb;

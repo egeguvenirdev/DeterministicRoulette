@@ -39,6 +39,13 @@ public class RouletteGameFlowService
             return false;
         }
 
+        GameStateData gameState = statisticsManager.CurrentState;
+        long totalStakeAfterAdding = (long)betManager.GetTotalStake() + stake;
+        if (gameState == null || totalStakeAfterAdding > gameState.totalChips)
+        {
+            return false;
+        }
+
         BetData bet = new BetData
         {
             betType = betType,

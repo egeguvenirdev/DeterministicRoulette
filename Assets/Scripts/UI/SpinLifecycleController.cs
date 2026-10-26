@@ -3,6 +3,7 @@ using UnityEngine;
 /// <summary>
 /// Manages spin lifecycle and delays result presentation until wheel animation completes.
 /// </summary>
+
 public class SpinLifecycleController : MonoBehaviour
 {
 	[SerializeField] private RouletteWheelAnimator wheelAnimator;

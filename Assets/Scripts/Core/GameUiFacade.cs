@@ -2,6 +2,9 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Provides the UI with a single entry point for gameplay actions and game state.
+/// </summary>
 public class GameUiFacade : MonoBehaviour
 {
     [Header("Gameplay Dependencies")]

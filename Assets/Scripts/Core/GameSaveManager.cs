@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// Simple PlayerPrefs-based save system for roulette game state.
+/// Saves and loads roulette game state using Unity PlayerPrefs.
 /// </summary>
 public static class GameSaveManager
 {

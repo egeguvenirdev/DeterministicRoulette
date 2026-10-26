@@ -51,6 +51,7 @@ public sealed class GameUiViewSync
         }
 
         GameStateData state = gameFacade.GetGameState();
+        stakeInputHandler?.ClampChipValueToAvailableBalance();
         roundResultPresenter?.PresentGameState(state);
         UpdateSpinButtonInteractable();
     }
@@ -63,6 +64,7 @@ public sealed class GameUiViewSync
         }
 
         GameStateData state = gameFacade.GetGameState();
+        stakeInputHandler?.ClampChipValueToAvailableBalance();
         roundResultPresenter?.PresentGameState(state);
 
         int betCount = gameFacade.GetActiveBetCount();

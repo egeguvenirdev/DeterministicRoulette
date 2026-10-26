@@ -2,6 +2,10 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
 
+/// <summary>
+/// Stores roulette number data, bet validation rules, and payout rates.
+/// </summary>
+
 public class RouletteRulesDatabase : MonoBehaviour
 {
     private static RouletteRulesDatabase instance;

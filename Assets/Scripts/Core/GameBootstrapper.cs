@@ -3,15 +3,15 @@ using UnityEngine;
 public class GameBootstrapper : MonoBehaviour
 {
     [Header("Core")]
-    [SerializeField] private RouletteRulesDatabase rulesDatabase;
-    [SerializeField] private OutcomeSelector outcomeSelector;
-    [SerializeField] private PayoutCalculator payoutCalculator;
-    [SerializeField] private BetManager betManager;
-    [SerializeField] private StatisticsManager statisticsManager;
-    [SerializeField] private RouletteGameManager gameManager;
+    [SerializeField] private RouletteRulesDatabase rulesDatabase; // Rulet sayılarını, renklerini, bahis geçerliliğini ve ödeme oranlarını tutar.
+    [SerializeField] private OutcomeSelector outcomeSelector; //Spin sonucunu seçer. Rastgele, belirli bir sayı veya bir preset.
+    [SerializeField] private PayoutCalculator payoutCalculator; // Sonuca göre kazanan bahisleri ve toplam ödemeyi hesaplar.
+    [SerializeField] private BetManager betManager; // Aktif bahisleri doğrular, tutar ve yönetir.
+    [SerializeField] private StatisticsManager statisticsManager; // Bakiye, spin sayısı, kazanma/kaybetme toplamları ve tur geçmişini günceller.
+    [SerializeField] private RouletteGameManager gameManager; // Tur servislerini bir araya getirir; spin’i çalıştırıp RoundCompleted olayını yayınlar.
 
     [Header("UI")]
-    [SerializeField] private GameUIController gameUIController;
+    [SerializeField] private GameUIController gameUIController; //Arayüz bileşenlerini ve kullanıcı etkileşimlerini koordine eder.
 
     private void Start()
     {

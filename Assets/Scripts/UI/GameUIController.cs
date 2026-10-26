@@ -76,6 +76,7 @@ public class GameUIController : MonoBehaviour
             return;
         }
 
+        stakeInputHandler?.Initialize(gameFacade);
         betActions = new GameUiBetActions(gameFacade, stakeInputHandler, this);
         persistenceCoordinator = new GameUiPersistenceCoordinator(gameFacade, roundHistoryListPresenter, roundResultPresenter);
         viewSync = new GameUiViewSync(gameFacade, spinButton, clearBetsButton, stakeInputHandler, betBoardController, roundResultPresenter);

@@ -1,6 +1,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Coordinates roulette round execution, including spin validation, outcome resolution,
+/// payout calculation, statistics updates, and bet cleanup.
+/// </summary>
+
 public sealed class RouletteRoundService
 {
     private readonly IOutcomeService outcomeService;

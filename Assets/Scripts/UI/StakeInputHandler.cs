@@ -10,6 +10,8 @@ public class StakeInputHandler : MonoBehaviour
     [SerializeField] private TMP_InputField chipValueInput;
     [SerializeField] private TMP_InputField stakeCountInput;
 
+    private GameUiFacade gameFacade;
+
     private void OnEnable()
     {
         Wire();
@@ -53,6 +55,42 @@ public class StakeInputHandler : MonoBehaviour
     {
         NormalizeInputField(chipValueInput);
         NormalizeInputField(stakeCountInput);
+        ClampChipValueToAvailableBalance();
+    }
+
+    public void Initialize(GameUiFacade facade)
+    {
+        gameFacade = facade;
+        ClampChipValueToAvailableBalance();
+    }
+
+    public void ClampChipValueToAvailableBalance()
+    {
+        if (chipValueInput == null || gameFacade == null || !gameFacade.IsReady)
+        {
+            return;
+        }
+
+        int stakeCount = ParsePositiveOrDefault(stakeCountInput, 1);
+        GameStateData state = gameFacade.GetGameState();
+        if (state == null)
+        {
+            return;
+        }
+
+        long availableChips = (long)state.totalChips - gameFacade.GetTotalStake();
+        long maxChipValueLong = availableChips / stakeCount;
+        int maxChipValue = maxChipValueLong <= 0 ? 0 : (int)System.Math.Min(maxChipValueLong, int.MaxValue);
+        int chipValue = ParsePositiveOrDefault(chipValueInput, 1);
+
+        if (maxChipValue == 0)
+        {
+            chipValueInput.text = "0";
+        }
+        else if (chipValue > maxChipValue)
+        {
+            chipValueInput.text = maxChipValue.ToString();
+        }
     }
 
     public bool TryGetStake(out int stake)
@@ -66,6 +104,12 @@ public class StakeInputHandler : MonoBehaviour
 
         int chipValue = ParsePositiveOrDefault(chipValueInput, 1);
         int stakeCount = ParsePositiveOrDefault(stakeCountInput, 1);
+
+        if (gameFacade != null && gameFacade.IsReady)
+        {
+            ClampChipValueToAvailableBalance();
+            chipValue = ParsePositiveOrDefault(chipValueInput, 1);
+        }
 
         long totalStake = (long)chipValue * stakeCount;
         if (totalStake <= 0 || totalStake > int.MaxValue)
@@ -90,8 +134,17 @@ public class StakeInputHandler : MonoBehaviour
         }
     }
 
-    private void HandleChipValueEndEdit(string _) => NormalizeInputField(chipValueInput);
-    private void HandleStakeCountEndEdit(string _) => NormalizeInputField(stakeCountInput);
+    private void HandleChipValueEndEdit(string _)
+    {
+        NormalizeInputField(chipValueInput);
+        ClampChipValueToAvailableBalance();
+    }
+
+    private void HandleStakeCountEndEdit(string _)
+    {
+        NormalizeInputField(stakeCountInput);
+        ClampChipValueToAvailableBalance();
+    }
 
     private static void NormalizeInputField(TMP_InputField input)
     {

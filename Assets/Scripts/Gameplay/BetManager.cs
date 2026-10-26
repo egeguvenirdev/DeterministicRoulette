@@ -1,6 +1,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Validates, stores, and manages the player's active roulette bets.
+/// </summary>
 public class BetManager : MonoBehaviour, IBetService
 {
     private readonly List<BetData> activeBets = new List<BetData>();
